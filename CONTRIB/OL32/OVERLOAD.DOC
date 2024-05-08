@@ -1,0 +1,122 @@
+
+                         OverLoader/32 Version 1.02
+                               DOCUMENTATION
+
+                 Copyright (c) 1993-97, Edward T. Schlunder
+            This is free software redistributable under the GPL.
+
+I. Contents
+ 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+        1.      Introduction
+        1.1     Tacking Data Files
+        1.2     Retrieving Data Files from C/C++
+        1.3     Credits
+
+  Disclaimer
+  ---------------------------------------------------------------------
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+  License Agreement
+  ---------------------------------------------------------------------
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Chapter 1. Introduction
+ 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+        OverLoader (or the OverThrowMachine Overlay Loader) is a little
+    set of code for tacking data files onto the end of another file in
+    an attempt to reduce the number of external data files required to
+    run a program. Often the data files are tacked onto the end of the
+    program's EXE file, as this can result in a highly compact package
+    where code and data can not accidentally become separated. In
+    addition, a small amount of disk space can be saved because of the
+    way the FAT file system stores small files on large hard drives.
+
+1.1 Tacking Data Files
+
+        So, how do you tack a data file onto the end of your EXE (or
+    other file)? The included utility OL.EXE makes this task easy.
+    Lets say you have a data file called MYIMAGE.JPG and you want to
+    tack it onto the end of the file MYPROG.EXE. You would type:
+
+        C:\>OL MYPROG.EXE MYIMAGE.JPG
+
+        What if you have more than one file? OL.EXE is smart enough
+    to add files and reorganize the location tables properly for
+    additional files. So, just continue tacking files on:
+
+        C:\>OL MYPROG.EXE MYPALET.PAL
+        C:\>OL MYPROG.EXE MYSOUND.WAV
+        C:\>OL MYPROG.EXE MYMUSIC.S3M
+
+        Note, be sure to type everything in uppercase. If you don't,
+    it make it more complicated to get the data back within your
+    program.
+
+1.2 Retrieving Files from C/C++
+
+        Once you've appended all your data together in one file, your
+    programs have to know how to retrieve the data. The included files
+    OVERLOAD.C and OVERLOAD.H make this very easy. Lets say you wanted
+    to read the tacked on MYSOUND.WAV file mentioned above into memory:
+
+    #include <stdio.h>
+    #include "overload.h"
+
+    int main(int argc, char *argv[]) {
+        char *MySound;
+        FILE *me;
+        long size;
+
+        me = fopen(argv[0], "rb");
+        size = OverLoad("MYSOUND.WAV", me);
+        if(size == 0) {
+            printf("Can't find the file MYSOUND.WAV in %s\n", argv[0]);
+            return(1);
+        }
+
+        MySound = new char[size];       //This is C++, use malloc for C
+
+        fread(MySound, 1, size, me);
+        fclose(me);
+
+        //Insert code to play MYSOUND.WAV here...
+
+        return(0);
+    }
+
+        This little program opens up itself (the EXE) and then calls
+    the OverLoad routine to retrieve the "MYSOUND.WAV" file inside the
+    file already opened as 'me'. OverLoad searches for the file, and if
+    found, moves the file position to the very beginning of the data
+    file and returns the length of the data. If it can't find the file,
+    it returns a 0 for error.
+    
+
+1.3 Credits
+
+        Edward Schlunder          - All code and documentation.
+
+            Email:      zilym@aztec.asu.edu
+                        edward@ajusd.ml.org
+            Home Page:  http://earthvision.asu.edu/~edward/
+                        http://ajusd.ml.org/~edward/
+
+
+        Hopefully you'll find this useful and this document explained
+    it enough for you. Feel free to use it in your own programs. If
+    you use it, it would be nice if you said hi to me in your greetings
+    or whatever. If you add a new feature, I'd like a copy of the changes
+    so that future releases can include it. 

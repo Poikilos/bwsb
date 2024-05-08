@@ -1,0 +1,37 @@
+                    ---= Tailgunner Target Practice ==---
+                             by Alex Chalfin
+
+ A game to somewhat show off the capabilities of BWSB.
+
+ Requirements:
+
+   - A 386 or faster computer.
+   - A BWSB compatible sound card (GUS, SB family, PAS).
+   - VGA/MCGA graphics card.
+   - About 400K free memory.
+
+
+ What this game demonstrates:
+
+   - Use of the PlaySample routine in an interactive sence.
+   - Combination of music and sound effects.
+   - Multiple sound effect channels.
+
+ Keys:
+  Cursor arrows - Moves gun around
+  Space bar     - Fire!
+  Enter         - Removes bitmap
+  Esc           - Quit
+
+ Please note, this game was a quick hack. If made properly, it could
+ actually be somewhat playable <g>. Just don't take any of the code as a
+ serious attempt to make a game :)
+
+ The GDM file (TTP.GDM) is an origional composition by Tek/OTM called
+ "Tek Gets Off", I just changed the name to TTP, and added 2 samples (the
+ laser and the explosion).
+
+ While playing the game, if it runs slowly on your computer, press ENTER, and
+ that will remove the cage bitmap. This will allow it to run much faster. Also,
+ I do not check for vertical retrace, so it will run as fast as your computer
+ will go.

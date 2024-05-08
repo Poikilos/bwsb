@@ -1,0 +1,18 @@
+CC= gcc
+LINK= gcc
+FLAGS=-m486 -fomit-frame-pointer -O2 -Wall
+RM= del
+
+all: ol.exe overload.o
+
+ol.exe: ol.o 
+	$(LINK) $(FLAGS) -s ol.o -o ol.exe
+
+ol.o: ol.c
+	$(CC) $(FLAGS) -c ol.c
+
+overload.o: overload.cpp overload.h
+	$(CC) $(FLAGS) -c overload.cpp
+
+clean:
+	$(RM) *.o

@@ -1,0 +1,111 @@
+Note: To compile a MSE you must use:
+
+	MK-mse [enter]
+
+Where 'mse' is the MSE you wish to
+create (SB1X, SB2X, SBPRO, SB16, PAS, or GUS).
+
+The new MSE file will then be put in ..\DEMO.
+It will overwrite any files of the same name.
+
+Notes on Which Files do What
+ 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+        GUS.ASM      - Main file for GUS MSE
+        SB1X.ASM     - Main file for SB1X MSE
+        SB2X.ASM     - Main file for SB2X MSE
+        SBPRO.ASM    - Main file for SBPRO MSE
+        SB16.ASM     - Main file for SB16 MSE
+        PAS.ASM      - Main file for PAS MSE
+
+        MIX-SP.INC   - Stereo, Parallel, mixing routine
+        MIX-MP.INC   - Mono, Parallel, mixing routine
+
+        FUNC.INC     - Function declaration list for the calling table
+        FUNCODE.INC  - Actual MSE interface functions
+
+        SBRATE.INC   - SB/SBPro sampling rate calculation routines
+        SB16RATE.INC - SB16 sampling rate calculation routines
+        PASRATE.INC  - PAS sampling rate calculation routines
+
+        SBDETECT.INC - SB, SBPro, SB16 detection routines (BASE, IRQ, DMA)
+        PASDETCT.INC - PAS detection routines (BASE, IRQ, DMA)
+        GUSDETCT.INC - GUS detection routines (BASE, IRQ, DMA)
+
+        SBMISC.INC   - Miscellaneous SB routines (DSP reset, etc)
+        PASMISC.INC  - Miscellaneous PAS routines (MV101 reset, etc)
+        GUSMISC.INC  - Miscellaneous GUS routines (GF1 init, etc)
+
+        BPMTABLE.INC - Table used to calculate BPM speeds on SB/PAS
+
+        MUS-P.INC    - Music row processing routines
+        MUS-EFX.INC  - Music effect processing routines
+
+        MSEDATA.INC  - Various MSE data variables
+
+        ALLOCDMA.INC - DMA aligned memory allocation routines
+
+        GDMSTRUC.INC - GDM file structure for GDM loading routines
+
+Notes on Self Modifying Code
+ 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+          Yes, BWSB uses a fair amount of self modifying code. You may
+        scream, yell, boo, or whatever about this, but really, self
+        modifying code is not that hard to work with. In some cases, it
+        actually makes coding easier than trying to code completely
+        without self modifying code.
+
+          BWSB mainly only uses self modifying MOVs. Self modifying MOVs
+        are easy to keep track of and are easy to understand. Take a
+        regular MOV for example:
+
+          MOV AX, 1234h           ;Put 1234h in AX
+
+          This is encoded by the Assembler as three bytes:
+
+          B8h 34h 12h
+
+          You can easy tell what it did. B8h is the MOV AX opcode.
+        34h is the low byte of the number 1234h. 12h is, of course, the
+        high byte of 1234h. This may seem somewhat backwards, but it is
+        the way the 80x86 family stores numbers.
+
+          With self modifying code, we set up a pointer to the 1234h
+        immediate number. We can then change the 1234h in MOV AX, 1234h
+        to any other number we want with our code:
+
+          ImmedPtr EQU $+1                ;Set up pointer to the 1234h
+          MOV AX, 1234h                   ;Put a number into AX
+
+          MOV WORD PTR cs:ImmedPtr, 5678h ;Replace the above 1234h with 5678h
+
+          When the last instruction in this code fragment runs, it will
+        modify the MOV AX, 1234h to actually read MOV AX, 5678h. Simple,
+        eh?
+
+          This can also be done with other instructions like SUB, ADD,
+        CMP, etc. Since these have different encodings and possibly
+        different lengths, you should examine the actual compiled
+        versions of these instructions. The file TEST.ASM in the UTIL
+        directory was used to make short COM files with one instruction
+        that we wanted to find out the encoding for. You can also get
+        this information from an instruction listing, but our method is
+        slightly easier in some cases.
+
+          A short note about this... The 80x86 family has an on chip
+        Prefetch Instruction Queue (PIQ). The processor reads in a
+        couple of bytes from memory and stores it in the PIQ for
+        execution later on. Because self modifying code only modifies
+        things in MEMORY and not in the PIQ, you could possibly modify
+        code in memory and it would still get executed the old way from
+        the PIQ that didn't change.
+
+          Ways to avoid this are:
+
+         a) do a JMP after modifying any code (always dumps the PIQ)
+         b) only modify code over 16 bytes away (the 486 PIQ is 16 bytes)
+
+          Because future versions of the 80x86 family may have larger
+        PIQs than 16 bytes, you really should modify code as far away as
+        possible.

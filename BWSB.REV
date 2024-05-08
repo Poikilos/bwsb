@@ -1,0 +1,243 @@
+        ÜÜÜÜ  ÜÜ  ÜÜ ÜÜÜÜÜ ÜÜÜÜ
+        ²Û  Û ÛÛ   Û ÛÛ  ß ²Û  Û  Bells, Whistles, & Sound Boards
+        ±²ßßÜ ÛÛ Ü Û ßßßßÛ ±²ßßÜ           Version 1.21GNU
+        °±ÜÜß ÛÛÛßÛÛ ÛÛÜÜÛ °±ÜÜß  See COPYING.ES for license details
+
+                    Copyright (c) 1993-1997, Edward Schlunder
+                                      -*-
+
+ v1.21Ä[ GNU GPL re-release ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [05-26-97]
+
+       + BWSB is now released under the GNU GPL (with one exception),
+         see COPYING.ES for details.
+
+ v1.21Ä[ 2GDM Updates ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [06-18-95]
+
+       + Added the old GDMFORM.TXT file that I am so ashamed of.
+         Someone -please- go through 2GDM.BAS and update this
+         document so that it is at least half correct.
+
+       + 2GDM now supports the ST3.2x default panning table.
+
+       + 2GDM now supports wildcards. Not quite perfect yet, but
+         quite useful already.
+
+       + 2GDM will now let you abort out during the conversion
+         process. Pressing ESC while 2GDM is busy will force it to
+         quit, quite possibly leaving an unfinnished GDM file. 
+
+       + OctaMED module support. Now you can convert all those
+         MMD1 format modules (previously only MMD0 was supported).
+
+       + MEDs and 8MEs with 8 channels will now convert properly.
+
+       + MED/8ME 'tempo's (BPM like speeds) now supported. This
+         was finetuned by ear, and my ear hasn't been trained to
+         what speed these should run at, since I don't have an Amiga
+         to try it on. Anyway, I found that setting the BPM to 3.78
+         of this tempo setting will make *many* modules sound better.
+         Let me know if you know of a more correct number.
+
+       + Ultrasound support now disables Line Input while playing.
+         This helps keep unwanted outside noises from joining in. Line
+         In is reenabled upon exit.
+
+       ! Ultrasound support should now work better on 386SXs.
+         Previously it would skip random notes here and there. Please
+         let me know if this screws up 486DX2/4/Pentium machines.
+
+       ! Ultrasound support now should play much better with loud
+         modules. I finally made a perfect GUS volume table, yippee!
+
+       ! No longer locks up on modules with 31..32 channels. Before
+         you could open 32 channels for sound effects but only 30 of
+         them could be used for music. Now you can play 32 channel
+         modules (as if anyone wanted to anyway). 
+
+       ! MEDs now use the correct loop end position (a remnant of the
+         old S3M chip bug).
+
+       ! Added StopBanner to the Quick Reference list in BWSB-REF.DOC.
+
+ v1.20Ä[ Release Fixes ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [05-25-95]
+
+       + Added some extra features to CHPLAY (there is a status
+         line now)
+
+       ! A major bug in the PowerBasic FreeMSE routine has been
+         squashed. You shouldn't get lockups any more when exiting
+         your programs.
+
+       ! Finally, the never ending S3M/MOD chip frequency bug is
+         gone. My huge thanks and free Advanced Registration goes
+         to I-Gene Leong (Mr. P / Power Source) for fixing this one.
+                                                      
+       ! Changed all C source code using '//' for comments to '/*',
+         '*/' pairs for better compatibility with some C compilers.
+
+       ! SETUP has been ported to C. Has better error checking and 
+         the resultant EXE is much smaller as well.
+
+       ! Fixed a bug in 2GDM which made it abort on random S3Ms
+         written with ST 3.2x.
+
+       ! Fixed some additional minor bugs as well in 2GDM's parsing.
+
+ v1.19Ä[ Public Release ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [04-23-95]
+
+       + Added StopBanner routine to turn off the signoff banner
+         associated with the unregistered version. Use this for
+         your freeware programs.
+
+ v1.18Ä[ Beta Fix ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [04-15-95]
+
+       ! CHPLAY will no longer screw up the screen on modules
+         with more than 24 channels.
+
+       ! Fixed a small bug in CHPLAY where one extra black box
+         was being printed and never got colored in (even at full
+         VU level).
+
+       ! 2GDM fixed to allow conversion of MODs using non-two's
+         complement channel numbers. Now, you can play the 28
+         channel sound track of TG95 "dope" demo from Complex.
+
+       ! Fixed a reference to OpenFile in the BWSB.DOC tutorial.
+         OpenFile is obsolete as of version v1.15, but I must've
+         overlooked this reference.
+
+         Thanks to Alex Chalfin for uncovering this error.
+
+ v1.17Ä[ Beta Release ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [04-03-95]
+
+         Just a beta version for upcomming v1.2, not much changed
+       since v1.16.
+
+       + Added more comments to the ASM example programs.
+
+       - Removed Alloc/FreeSample routines until it works with GUS.
+         (actually, it's still there, I just removed the example
+         programs for it. If you really want to use it, you can, but
+         then all GUS users will not be able to use your program)
+         
+       - Went back to old mono mixing routine that is one byte larger.
+         This is for stupid reasons, which were my fault. It'll be
+         back soon, hopefully even better.
+
+ v1.16Ä[ Release Fixes ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [03-20-95]
+
+       + LoadMSE now includes an option to load from file offsets other
+         than zero. This allows MSEs to be tacked onto the end of your
+         EXEs and to be put in huge data files.
+
+       + Added pure ASM support. Only works in medium and large memory
+         models. There is no tutorial for ASM programming in
+         BWSB.DOC, so just look at the example programs and
+         BWSB-REF.DOC.
+
+       + Added AllocSample and FreeSample for runtime sound effects
+         loading (separate from LoadGDM). Does not work with GUS
+         yet.
+
+       ! All the C example source code had a bug in their EMS enabling
+         code.
+
+       ! Fixed many bugs in OverLoader to work better with C/C++
+
+       ! Fixed a bug where if FreeMSE got called too many times, it
+         could cause memory allocation errors.
+
+       ! REGISTER.DOC was about the only doc I forgot to update. BWSB
+         as of v1.15 does *not* compile under MASM 5.1. While it doesn't
+         use TASM's ideal mode, compiling under MASM now results in over
+         a hundred "phase errors". TASM 3.1 does a perfectly fine job.
+
+ v1.15Ä[ Many Additions ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [03-06-95]
+
+       + C/C++ support added (Medium and Large memory models only)
+         No Watcom C++/32bit support yet, but we're working on it!
+
+       + PowerBasic 3.x support added. Wheew! What a lot of support..
+
+       + CHPLAY.C and PLAYC.C added. CHPLAY.C finally demonstrates how
+         to use the GetChannelTable routine..
+
+       - No longer has 6 channel and no sound effect playing limitation
+         on evaluation version.
+
+       + Has a tiny ending screen when FreeMSE is called.
+
+       + The evaluation version may now be used in freeware programs
+         without requiring registrations. Just go out and tell other
+         people how wonderful BWSB is, okay? hehehehehehe
+
+       + Added the MAKE.BAT file to aid in compiling of the example
+         demos.
+
+       + MSEs are greatly reduced in size on disk (less than 12K each)
+
+       + MSEs use slightly less memory at runtime.
+
+       + Turbo Pascal support no longer needs OpenFile/CloseFile!
+
+       + Did some nice remodeling in BWSB-REF.DOC
+
+       + Added several C/C++ examples to BWSB-REF.DOC. More to come when
+         I get more free time!
+
+       + GUS volume table is now louder. I still don't like this one
+         too much; it's a little too loud.
+
+       + Mixing loop is two bytes shorter in the mono MSEs -> possible
+         speed increase for CPUs with large PIQs.
+
+       + Added function ChannelPos to return the sample's currently
+         playing position. Use for digital speech syncronization and
+         playing samples larger than 64K.
+
+       + 2GDM now updates the previous FLAG field to tell what file
+         format the module was originally (see GDMTYPE.BI for info).
+
+       + 2GDM now supports UltraTracker v1.60 modules.
+
+       - LoadMSE no longer returns the device name on return.
+
+       - Removed the SETUP.EXE source code. It is still there in the
+         registered versions (both Standard and Advanced), but we needed
+         to save space in the distribution archive.
+
+         Nothing really changed in SETUP, so you can grab v1.02 if you
+         really want to see the source to it before registering.
+
+       + Added DeviceName function to return the device name (like
+         LoadMSE used to do).
+
+       ! Renamed the structure GDMHeaderType to simply GDMHeader (why
+         type extra junk?). You may have to edit some of your old source
+         codes.
+
+ v1.04 Ä[ Bug Fix Version ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [02-11-95]
+
+       ! SetAutoMix was misdocumented in BWSB-REF.DOC
+
+ v1.03 Ä[ Bug Fix Version ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [02-05-95]
+
+       + ST3.2 Fine Vibrato effect implemented
+
+       ! Arpeggio lockup bug fixed
+
+       ! SetAutoMix had a bug in the Turbo Pascal version so that it was
+         non-functional
+
+       ! The SB16 MSE only played at the correct speed at 45KHz
+
+       ! Fixed bug in all of SB family (except SBPro) with IRQ 10 support
+
+       ! SBTECH.DOC was misdocumented on DSP commands 41h and 42h
+
+       ! MusicLoop was misdocmented in BWSB-REF.DOC.
+
+ v1.02 Ä[ BWSB is Born! ]ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [12-24-94]
+
+         First Public Release!
+

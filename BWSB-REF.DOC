@@ -1,0 +1,1438 @@
+
+                    Bells, Whistles, and Sound Boards
+                         REFERENCE DOCUMENTATION
+
+                v1.21 for ASM, C/C++, TP, QB, PDS, and PB
+
+                 Copyright (c) 1993-97, Edward Schlunder
+                See COPYING.ES for redistribution details.
+
+   This project was started on 07-14-93 and now completed on 06-18-95
+            (two years have been put into the making of BWSB)
+
+  Quick Reference
+  ---------------------------------------------------------------------
+     NOTE: * denotes not usable yet on a Gravis Ultrasound.
+
+    *AllocSample       Allocate a sample slot (for sound effects)
+     AmigaHertz        Set Amiga Clock speed (for period calculations)
+     ChannelPan        Get or set a channel's pan position
+     ChannelPos        Get or set current play position on channel
+     ChannelVol        Get or set a channel's volume setting
+     ChannelVU         Get or set a channel's VU value
+     DeviceName        Returns the name of the current sound device
+     EmsExist          Determine whether EMS services exist or not
+     FreeMSE           Remove MSE from memory
+    *FreeSample        Remove a sample slot (free it for other uses)
+     GetChannelTable   Get information on a channel
+     GetMainScope      Get the currently played sample for a scope
+     GetSampleTable    Get information on a sample
+     LoadGDM           Load a GDM module from disk
+     LoadMSE           Load MSE file from disk
+     MixForground      Mix sound in the foreground
+     MixStatus         Get mix request flag
+     MusicBPM          Get or set the BPM speed
+     MusicLoop         Get times music has looped; set loop enable flag
+     MusicStatus       Get music processing enable status
+     MusicOrder        Get or set the music playing order number
+     MusicPattern      Get or set the music playing pattern number
+     MusicRow          Get the music playing row
+     MusicTempo        Get or set the music Tempo
+     MusicVolume       Get or set the global music volume
+     PlaySample        Play sound effect already loaded into MSE memory
+     SetAutoMix        Select foreground mixing or background mixing
+     StartMusic        Enable music processing
+     StartOutput       Turn on sound mixing
+     StopBanner        Disable signoff banner in unregistered version
+     StopMusic         Disable music processing
+     StopOutput        Turn off sound mixing
+     UnloadModule      Free the loaded module from memory
+
+  AllocSample
+  ---------------------------------------------------------------------
+     Purpose:  Load a sample slot with sample data
+
+     Syntax:
+       [C/C++] extern int cdecl AllocSample(unsigned char SamNum,
+               SamHeader *SamHead);
+      [QB/PDS] DECLARE FUNCTION AllocSample% (SamNum%, SamHeadSeg%,
+               SamHeadOff%)
+          [TP] Function AllocSample(SamNum : Byte; Var SamHead) : Word;
+         [ASM] extrn AllocSample:far
+
+     Remarks:  You need to load the sample data into memory prior to
+               calling this routine. It needs to be loaded into base
+               memory using DOS's allocation routine (ie, segment
+               aligned).
+
+               This routine currently only uses base memory for sample
+               data. It does not work with GUS at this time.
+
+     Calling:
+         cl    SamNum      - Sample slot number to put the sample into.
+               (0..255)      Note: Try to use high order sample slots
+                             because the music will always use sample
+                             slots starting from 0.
+         dx:si SamHeader   - This structure must be filled with all
+                             proper information for the sample before
+                             calling this routine. Those which do not
+                             apply to sound effect samples should be set
+                             to zero.
+
+     Returns:
+         ax    AllocSample - Error code:
+                             0 - No Error, do not dealloc sample from
+                                 DOS
+                             1 - No Error, should dealloc sample from
+                                 DOS
+                             2 - Sample slot already used
+                             3 - Insufficient memory for sample
+
+     See Also: FreeSample
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  AmigaHertz
+  ---------------------------------------------------------------------
+     Purpose:  Set the Amiga clock speed for music period calculations
+
+     Syntax:
+       [C/C++] extern void cdecl AmigaHertz(long NewSpeed);
+      [QB/PDS] DECLARE SUB AmigaHertz (NewSpeed&)
+          [TP] Procedure AmigaHertz(NewSpeed : Longint);
+         [ASM] extrn AmigaHertz:far
+
+     Remarks:  none
+
+     Calling:
+         eax   NewSpeed    - New Amiga clock speed for period
+                             calculations. Some common values are:
+                             3579545 (Amiga NTSC Machines, Default)
+                             3546895 (Amiga PAL Machines)
+                             3579264 (Scream Tracker)
+
+     Returns:  none
+
+     See Also: none
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  ChannelPan
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the specified channel's panning position
+
+     Syntax:
+       [C/C++] extern int cdecl ChannelPan(unsigned char Channel,
+               unsigned char NewPos);
+      [QB/PDS] DECLARE FUNCTION ChannelPan% (Channel%, NewPos%)
+          [TP] Function ChannelPan(Channel, NewPos : Byte) : Byte;
+         [ASM] extrn ChannelPan:far
+
+     Remarks:  Setting all the channels to one side or the other may
+               result in cracks and clicks in the output (except on the
+               GUS). Try to keep the number of locations more or less
+               balanced on left and right sides.
+
+               Note also that positions between Left, Middle, and Right
+               require additional CPU time (except on the GUS).
+
+     Calling:
+         bl    Channel     - Channel number to get or set pan on.
+               (1..32)
+         al    NewPos      - New pan position. 0 is full left, 15 is
+               (FFh, 0..15)  full right, 8 is middle. Positions in
+                             between are varying degrees of Left and
+                             Right together.
+
+                             FFh does not affect pan position.
+
+     Returns:
+         al    ChannelPan  - Current pan position in use.
+               (0..15)
+
+     See Also: ChannelVol
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  ChannelPos
+  ---------------------------------------------------------------------
+     Purpose:  Get or set current location in playback on a channel
+
+     Syntax:
+       [C/C++] extern unsigned int cdecl ChannelPan(unsigned char
+               Channel, unsigned int NewPos);
+      [QB/PDS] DECLARE FUNCTION ChannelPos& (Channel%, NewPos&)
+          [TP] Function ChannelPos(Channel : Byte, NewPos : Word)
+               : Word;
+         [ASM] extrn ChannelPos:far
+
+     Remarks:  This is most useful when playing digital samples larger
+               than 64K and for synchronizing speech with a graphical
+               character on screen.
+
+     Calling:
+         bl    Channel     - Channel number to get or set position on.
+               (1..32)
+         ax    NewPos      - New play position. FFFFh does no changing.
+               (FFFFh, 0..65534)
+
+     Returns:
+         ax    ChannelPos  - Current play position in sample.
+               (0..65535)
+
+     See Also: PlaySample
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  ChannelVol
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the channel's volume setting
+
+     Syntax:
+       [C/C++] extern int cdecl ChannelVol(unsigned char Channel,
+               unsigned char NewVol);
+      [QB/PDS] DECLARE FUNCTION ChannelVol% (Channel%, NewVol%)
+          [TP] Function ChannelVol(Channel, NewVol : Byte) : Word;
+         [ASM] extrn ChannelVol:far
+
+     Remarks:  none
+
+     Calling:
+         bl    Channel     - Channel number to get or set volume on.
+               (1..32)
+         al    NewVol      - New volume to play at. FFh does not change
+               (FFh, 0..64)  current volume.
+
+     Returns:
+         ax    ChannelVol  - Current volume setting in use.
+               (0..64)
+
+     See Also: ChannelVU, ChannelPan
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  ChannelVU
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the channel's VU bar setting
+
+     Syntax:
+       [C/C++] extern int cdecl ChannelVU(unsigned char Channel,
+               unsigned char NewVU);
+      [QB/PDS] DECLARE FUNCTION ChannelVU% (Channel%, NewVU%)
+          [TP] Function ChannelVU(Channel, NewVU : Byte) : Word;
+         [ASM] extrn ChannelVU:far
+
+     Remarks:  none
+
+     Calling:
+         bl    Channel     - Channel number to get or set volume on.
+               (1..32)
+         al    NewVU       - New VU level. FFh does not change
+               (FFh, 0..32)  current VU level.
+
+     Returns:
+         ax    ChannelVU   - Current VU level in use.
+               (0..32)
+
+     See Also: ChannelVol, ChannelPan
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  DeviceName
+  ---------------------------------------------------------------------
+     Purpose:  Return the name of the current sound device
+
+     Syntax:
+       [C/C++] extern char *DeviceName(void);
+      [QB/PDS] DECLARE FUNCTION DeviceName$ ()
+          [TP] Function DeviceName : String;
+         [ASM] extrn DeviceName:far
+
+     Remarks:  none
+
+     Calling:  none
+
+     Returns:
+         dx:ax DeviceName  - Name of the current sound device in use.
+               (<=20 chars)
+
+     See Also: LoadMSE
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM, LOAD_PDS.BAS,
+               LOAD_QB.BAS
+
+     Example:  PLAYC.C, MMP.BAS, GDMPLAY.PAS
+
+  EmsExist
+  ---------------------------------------------------------------------
+     Purpose:  Determine whether EMS services exist or not
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl EmsExist(void);
+      [QB/PDS] DECLARE FUNCTION EmsExist% ()
+          [TP] Function EmsExist : Boolean;
+         [ASM] extrn EmsExist:far
+
+     Remarks:  This routine is needed if you wish to load a module into
+               EMS memory. The module loading routines do not detect
+               whether EMS is available or not, and will not use EMS if
+               not told to. If told to, and EMS services are not really
+               available (ie, didn't use this detection routine), the
+               machine will probably lock up.
+
+     Calling:  none
+
+     Returns:
+         ax    EmsExist    - EMS Exist Flag: 0- EMS services not found
+                                             1- EMS services available
+
+     See Also: LoadGDM
+
+     Source:   C_MSE.ASM, EMS.ASM, MSE_TP.PAS
+
+     Example:  MMP.BAS, PLAYC.C, GDMPLAY.PAS
+
+  FreeMSE
+  ---------------------------------------------------------------------
+     Purpose:  Deallocate MSE memory and unload MSE file
+
+     Syntax:
+       [C/C++] extern void cdecl FreeMSE(void);
+      [QB/PDS] DECLARE SUB FreeMSE ()
+          [TP] Procedure FreeMSE;
+         [ASM] extrn FreeMSE:far
+
+     Remarks:  This function is called to unload the current MSE so
+               that you could either exit your program or possibly load
+               a different MSE file (using LoadMSE). It will disable
+               sound output if needed, deallocate all MSE memory
+               (including music and sound effects), and unload the MSE.
+
+               After this is called, do *not* use any of the other MSE
+               functions (except LoadMSE) because this will result in a
+               system crash or reboot.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: LoadMSE
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM, MSE_TP.PAS
+
+     Example:  See example of LoadMSE
+
+  FreeSample
+  ---------------------------------------------------------------------
+     Purpose:  Frees a sample slot and deallocates its memory
+
+     Syntax:
+       [C/C++] extern int cdecl FreeSample(unsigned char SamNum);
+      [QB/PDS] DECLARE FUNCTION FreeSample% (SamNum%)
+          [TP] Function FreeSample(SamNum : Byte) : Word;
+         [ASM] extrn FreeSample:far
+
+     Remarks:  You can not free sample slots used by the currently
+               loaded music module.
+
+     Calling:
+         cl    SamNum      - Sample slot number to free sample from.
+               (0..255)
+
+     Returns:
+         ax    FreeSample  - Error code:
+                             0 - No error
+                             1 - Sample slot isn't used
+                             2 - Can not free module sample
+
+     See Also: AllocSample
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  GetChannelTable
+  ---------------------------------------------------------------------
+     Purpose:  Get extended information on a sound or music channel
+
+     Syntax:
+       [C/C++] extern void cdecl GetChannelTable(char Channel,
+               int TSeg, int TOff);
+      [QB/PDS] DECLARE SUB GetChannelTable (Channel%, TSeg%, TOff%)
+          [TP] Procedure GetChannelTable(Channel : Byte; TSeg,
+               TOff : Word);
+         [ASM] extrn GetChannelTable:far
+
+     Remarks:  This routine is more of a hack job than anything, in the
+               future it will most likely be replaced by some more
+               eloquent functions.
+
+     Calling:
+         bl    Channel     - Digital channel to get information on.
+               (1..32)
+         dx    TSeg        - Segment of 128 byte buffer to hold the
+                             channel information. Format of this is
+                             declared in CHANTYPE.BI (QB/PDS) or
+                             CHANTYPE.H (C/C++).
+         di    TOff        - Offset of 128 byte buffer to hold channel
+                             information.
+
+     Returns:
+               ChanTab     - Now filled with information on the desired
+                             channel.
+
+     See Also: GetSampleTable
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  CHPLAY.C
+
+  GetMainScope
+  ---------------------------------------------------------------------
+     Purpose:  Get currently played sample from the mixing buffer
+
+     Syntax:
+       [C/C++] extern void cdecl GetMainScope(unsigned int *Left,
+               unsigned int *Right);
+      [QB/PDS] DECLARE SUB GetMainScope (Left%, Right%)
+          [TP] Procedure GetMainScope(Var Left, Right : Word);
+         [ASM] extrn GetMainScope:far
+
+     Remarks:  Values from this are useful in creating a digital output
+               scope (showing the sound's waveform).
+
+               If the current sound device has one 8 bits output, the
+               sample will be multiplied by 256 so that it fits in a 16
+               bit number.
+
+     Calling:  none
+
+     Returns:
+         ax    Left        - Currently played sample on left speaker.
+               (0..FFFFh)
+         cx    Right       - Currently played sample on right speaker.
+               (0..FFFFh)
+
+     See Also: none
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  GDMSCOPE.PAS
+
+  GetSampleTable
+  ---------------------------------------------------------------------
+     Purpose:  Get extended information on a digital sample
+
+     Syntax:
+       [C/C++] extern void cdecl GetSampleTable(unsigned char Sample,
+               int TSeg, int TOff);
+      [QB/PDS] DECLARE SUB GetSampleTable (Sample%, TSeg%, TOff%)
+          [TP] Procedure GetSampleTable(Sample : Byte; TSeg,
+               TOff : Word);
+         [ASM] extrn GetSampleTable:far
+
+     Remarks:  This routine is more of a hack job than anything, in the
+               future it will most likely be replaced by some more
+               eloquent functions.
+
+     Calling:
+         bl    Sample      - Sample number to get information on.
+               (0..255)
+         dx    TSeg        - Segment of 64 byte buffer to hold the
+                             sample information. Format is declared in
+                             GDMTYPE.BI or GDMTYPE.H.
+         di    TOff        - Offset of 64 byte buffer to hold the
+                             sample information.
+
+     Returns:  SamTable    - Now filled with information on the desired
+                             channel.
+
+     See Also: GetChannelTable
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  LoadGDM
+  ---------------------------------------------------------------------
+     Purpose:  Load a GDM module from disk into MSE memory
+
+     Syntax:
+       [C/C++] extern void cdecl LoadGDM(int Handle, long FileOff,
+               int *Flags, GDMHeader *gdmhead);
+      [QB/PDS] DECLARE SUB LoadGDM (Handle%, FileOff&, Flags%,_
+               GDMHeadSeg, GDMHeadOff)
+          [TP] Function LoadGDM(Var Handle : File; FileOff : Longint;
+               Var Flags : Word; Var GDMHead) : Word;
+         [ASM] extrn LoadGDM:far
+
+     Remarks:  GDMHead is a type structure defined in the file
+               GDMTYPE.BI, GDMTYPE.H, and MSE_TP.PAS.
+
+               Before you can play music or any sound effects, you must
+               load a module from disk. Use this routine to load GDMs
+               (converted from another format with the 2GDM utility).
+
+     Calling:
+         ax    Handle      - File handle number of a previously opened
+                             file (the GDM to load) in BINARY mode.
+
+                   [QB/PDS]  Basic doesn't use DOS file handles like
+                             BWSB requires. To get a DOS file handle
+                             from Basic's file handles, use the
+                             FILEATTR function.
+         ecx   FileOff     - Offset into the file to start loading the
+                             module from (for playing modules within
+                             EXEs, etc).
+         bl    Flag        - Loading flags. Currently only bit 0 is
+                             used.                   [NO EFFECT ON GUS]
+                             0 - Load into base memory only
+                             1 - Load into EMS memory (must be present)
+
+     Returns:
+         dx:di GDMHead     - Now filled with information from the
+                             module. Use this to find things like the
+                             module's title, etc.
+         bl    Flag        - Module load error code:
+                             0 - No errors, module loaded successfully.
+                             1 - Module is corrupt
+                             2 - Could not autodetect module type (N/A)
+                             3 - Bad file format ID string
+                             4 - Insufficient memory to load module
+                             5 - Can not unpack samples
+                             6 - AdLib instruments not supported
+
+                             If you get back any error code other than
+                             0, do *not* enable music processing. If
+                             you do, you'll probably end up crashing
+                             the system.
+
+     See Also: UnloadModule
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:
+     [C/C++]-----------------------------------------------------------
+     #include <bwsb.h>                  // always need this!
+
+     #include <stdio.h>
+     #include <io.h>
+     #include <fcntl.h>
+     void main(void)
+     {  int ErrorFlag, Handle;
+        int BaseIO = { 0xFFFF };
+        int IRQ = { 0xFF };
+        int DMA = { 0xFF };
+        GDMHeader ModHead;
+
+        ErrorFlag = LoadMSE("SB1X.MSE", 0, 45, 4096,
+                            &BaseIO, &IRQ, &DMA);
+        if (ErrorFlag)
+        {  printf("Error while loading MSE: %u\n", ErrorFlag);
+           return;                                              }
+
+        if ((Handle = open("TUNE.GDM", O_RDONLY | O_BINARY)) == -1)
+        {  printf("Can't find file TUNE.GDM\n");
+           return;                                              }
+
+        printf("Loading module TEST.GDM\n");
+        ErrorFlag = EmsExist && 1;      // Enable EMS use if available
+        LoadGDM(Handle, 0, &ErrorFlag, &ModHead);
+        close(Handle);
+
+        switch(ErrorFlag)
+        {  case 0:  printf("Finished loading module..\n");
+                    break;
+           case 1:  printf("Module is corrupt\n");
+                    return;
+           case 2:  printf("Could not autodetect module type\n");
+                    return;
+           case 3:  printf("Bad format ID\n");
+                    return;
+           case 4:  printf("Out of memory\n");
+                    return;
+           case 5:  printf("Cannot unpack samples\n");
+                    return;
+           case 6:  printf("AdLib samples not supported\n");
+                    return;
+           default: printf("Unknown load error: %u\n", ErrorFlag);
+                    return;                                     }
+        printf("Song: %.32s\n", ModHead.SongTitle);
+
+        UnloadModule();                 // Remove module from memory
+        FreeMSE();                      // Remove MSE from memory
+     }
+
+  LoadMSE
+  ---------------------------------------------------------------------
+     Purpose:  Load and initialize the specified MSE file
+
+     Syntax:
+       [C/C++] extern int cdecl LoadMSE(char *MSE, unsigned long
+               FileOff, unsigned char OverRate, int BufferSize,
+               int *Addr, int *IRQ, int *DMA);
+      [QB/PDS] DECLARE FUNCTION LoadMSE% (MSE$, FileOff&, OverRate%,_
+               BufferSize%, Addr%, IRQ%, DMA%)
+          [TP] Function LoadMSE(MSE : String; FileOff : Longint;
+               OverRate, BufferSize : Word; Var Addr : Word; Var IRQ,
+               DMA : Byte) : Word;
+         [ASM] extrn LoadMSE:far
+     Remarks:  LoadMSE *must* be called before any of the other
+               routines are used. Calling other routines before using
+               this one will result in a system crash or reboot.
+
+               After LoadMSE is called, you can do any other MSE
+               function calls that you want, however, sound output is
+               not enabled until you call StartOutput.
+
+               The reason for this is that having sound output enabled
+               uses additional CPU time at all times to keep the output
+               stream moving (except on GUS cards). By keeping these
+               two functions separate, you can allow MSE calls and
+               still use the full CPU power while doing such things as
+               loading music files, etc, which do not need sound output
+               to be enabled.
+
+     Calling:
+         ds:bx MSE         - Path and file name of the MSE file you
+                             wish to use.
+         edi   FileOff     - File offset to begin loading from. This is
+                             useful for using MSEs that have been
+                             tacked onto the end of your EXE file or a
+                             large data file.
+         ah    OverRate    - xxKHz oversampling rate you wish to use.
+               (4..48)       Higher oversampling rates provide higher
+                             sound fidelity, but uses up more CPU time
+                             to do so.
+
+                             This value is ignored on the GUS.
+         al    BufferSize  - This is the size of the mixing buffer you
+               (256..32767)  want to use for the MSE. Larger buffers
+                             take more memory and stops foreground
+                             execution for longer amounts of time, but
+                             causes less clicks and reverberation.
+                             Smaller buffers take less memory, but tend
+                             to use more CPU time overall and have a
+                             greater tendency to reverberate during CPU
+                             intensive tasks such as disk access, etc.
+                             Experiment and see what works best for
+                             your specific application.
+
+                             This value is ignored on the GUS.
+         dx    Addr        - Base I/O address of the sound card in use.
+                             Use the value FFFFh for autodetection.
+         ch    IRQ         - IRQ level of the sound card in use. Use
+                             the value FFh for autodetection.
+         cl    DMA         - DMA channel of sound card in use. Use the
+                             value FFh for autodetection.
+
+     Returns:
+         dx    Addr        - Actual base I/O address used (useful when
+                             using autodetection)
+         ch    IRQ         - Actual IRQ level used.
+         cl    DMA         - Actual DMA channel used.
+         ax    ErrCd       - MSE installation error code:
+                             0 - No error, MSE installation successful
+                             1 - Base I/O address autodetection failure
+                             2 - IRQ level autodetection failure
+                             3 - DMA channel autodetection failure
+                             4 - DMA channel not supported
+                             5 - n/a
+                             6 - Sound device does not respond
+                             7 - Memory control blocks destroyed
+                             8 - Insufficient memory for mixing buffers
+                             9 - Insufficient memory for MSE file
+                             10- MSE has invalid identification string
+                             11- MSE disk read failure
+                             12- MVSOUND.SYS not loaded
+                             13- Insufficient memory for volume table
+
+     See Also: FreeMSE
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:
+     [C/C++]-----------------------------------------------------------
+     #include <bwsb.h>
+
+     #include <stdio.h>
+     void main(void)
+     {  int ErrorFlag, Handle;
+        int BaseIO = { 0xFFFF };
+        int IRQ = { 0xFF };
+        int DMA = { 0xFF };
+        GDMHeader ModHead;
+
+        ErrorFlag = LoadMSE("SB1X.MSE", 0, 45, 4096,
+                            &BaseIO, &IRQ, &DMA);
+        switch (ErrorFlag)
+        {  case 0:  break;
+           case 1:  printf("Base I/O address autodetection failure\n");
+                    return;
+           case 2:  printf("IRQ level autodetection failure\n");
+                    return;
+           case 3:  printf("DMA channel autodetection failure\n");
+                    return;
+           case 4:  printf("DMA channel not supported\n");
+                    return;
+           case 6:  printf("Sound device does not respond\n");
+                    return;
+           case 7:  printf("Memory control blocks destroyed\n");
+                    return;
+           case 8:  printf("Insufficient memory for mixing buffers\n");
+                    return;
+           case 9:  printf("Insufficient memory for MSE file\n");
+                    return;
+           case 10: printf("MSE has invalid identification string\n");
+                    return;
+           case 11: printf("MSE disk read failure\n");
+                    return;
+           case 12: printf("MVSOUND.SYS not loaded\n");
+                    return;
+           case 13: printf("Insufficient memory for volume table\n");
+                    return;
+           default: printf("Unknown MSE load error: %u\n", ErrorFlag);
+                    return;                                     }
+        printf("Sound Device: %.20s\n", DeviceName());
+
+        FreeMSE();                      // Remove MSE from memory
+     }
+
+  MixForground
+  ---------------------------------------------------------------------
+     Purpose:  Mix a new sound buffer when MixStatus <> 0
+
+     Syntax:
+       [C/C++] extern void cdecl MixForground(void);
+      [QB/PDS] DECLARE SUB MixForground ()
+          [TP] Procedure MixForground;
+         [ASM] extrn MixForground:far
+
+     Remarks:  This function should only be used when you have selected
+               foreground mixing using the SetAutoMix routine. When the
+               MixStatus function turns nonzero, you should call this
+               routine ASAP so that sound output will remain smooth and
+               unreverberated.
+
+               When using foreground mixing, it is best to use a larger
+               mixing buffer than normally. This will give you more time
+               in between needed calls to MixForground. See LoadMSE for
+               more details on setting the mixing buffer size.
+
+               This has no effect on the GUS since the GUS does all
+               it's mixing in the background by itself.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: SetAutoMix, MixStatus, LoadMSE
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:
+     [C/C++]-----------------------------------------------------------
+     #include <bwsb.h>
+
+     #include <stdio.h>
+     #include <conio.h>
+     #include <io.h>
+     #include <fcntl.h>
+     void main(void)
+     {  int ErrorFlag, Handle, j;
+        int Channels = { 0 };
+        int BaseIO = { 0xFFFF };
+        int IRQ = { 0xFF };
+        int DMA = { 0xFF };
+        GDMHeader ModHead;
+
+        // Please note that when using foreground mixing, we use a
+        // larger mixing buffer (8192 bytes in this case).
+        ErrorFlag = LoadMSE("SB1X.MSE", 0, 45, 8192,
+                            &BaseIO, &IRQ, &DMA);
+
+        if (ErrorFlag)
+        {  printf("Error while loading MSE: %u\n", ErrorFlag);
+           return;                                              }
+
+        if ((Handle = open("TEST.GDM", O_RDONLY | O_BINARY)) == -1)
+        {  printf("Can't find file TEST.GDM\n");
+           return;                                              }
+
+        ErrorFlag = EmsExist && 1;      // Enable EMS use if available
+        LoadGDM(Handle, 0, &ErrorFlag, &ModHead);
+        close(Handle);
+
+        if (ErrorFlag)
+        {  printf("Error while loading GDM: %u\n", ErrorFlag);
+           return;                                              }
+
+        // Scan and count number of used music channels
+        // 0xFF is an unused channel, so only inc when not = 0xFF
+        for (j = 0;j < 32;j++)
+          if (ModHead.PanMap[j] != 0xFF) Channels++;
+
+        StartOutput(Channels, 0);       // Enable sound output with
+                                        // no amplification.
+
+        StartMusic();                   // Start playing the music
+        printf("Music should now be playing\n");
+        printf("Press any key to stop music..\n");
+
+        SetAutoMix(0);                  // Disable background mixing
+
+        while(!kbhit())                 // Loop until a key is pressed
+        {  if (MixStatus())             // Is mixing needed?
+             MixForground();        }   // Yes, call the mixing routine
+
+        getch();                        // Clear the keyboard buffer
+
+        StopMusic();                    // Stop playing music
+        printf("Music has been stopped\n");
+
+        StopOutput();                   // Disable sound output
+        UnloadModule();                 // Remove module from memory
+        FreeMSE();                      // Remove MSE from memory
+     }
+
+
+  MixStatus
+  ---------------------------------------------------------------------
+     Purpose:  Get the current mixing demand flag
+
+     Syntax:
+       [C/C++] extern int cdecl MixStatus(void);
+      [QB/PDS] DECLARE FUNCTION MixStatus% ()
+          [TP] Function MixStatus : Word;
+         [ASM] extrn MixStatus:far
+
+     Remarks:  This function is used in conjunction with the
+               MixForground routine to do all sound mixing in the
+               foreground instead of the background automatically.
+               Before you can use this, you must disable background
+               mixing using the SetAutoMix routine.
+
+               This has no effect on the GUS.
+
+     Calling:  none
+
+     Returns:
+         ax    MixStatus   - Mix demand flag:
+                             0 - No mixing currently needed
+                             1 - Mixing needed, call MixForground
+
+     See Also: SetAutoMix, MixForground
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  MusicBPM
+  ---------------------------------------------------------------------
+     Purpose:  Get or set current music BPM (Beat Per Minute) speed
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicBPM(unsigned char
+               NewBPM);
+      [QB/PDS] DECLARE FUNCTION MusicBPM% (NewBPM%)
+          [TP] Function MusicBPM(NewBPM : Byte) : Byte;
+         [ASM] extrn MusicBPM:far
+
+     Remarks:  The default BPM speed for a MOD is 125.
+
+     Calling:
+         ah    NewBPM      - New BPM speed to use. Value of 0 does not
+               (0, 32..255)  change the current BPM.
+
+     Returns:
+         ax    MusicBPM    - The current BPM speed in use.
+               (32..255)
+
+     See Also: MusicTempo
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for MixForground
+
+  MusicLoop
+  ---------------------------------------------------------------------
+     Purpose:  Get number of times music looped/Set music loop enable
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicLoop(unsigned char
+               LoopEnable);
+      [QB/PDS] DECLARE FUNCTION MusicLoop% (LoopEnable%)
+          [TP] Function MusicLoop(LoopEnable : Byte) : Byte;
+         [ASM] extrn MusicLoop:far
+
+     Remarks:  none
+
+     Calling:
+         ah    LoopEnable  - Enable/disable music looping:
+                              0 - Music looping disabled. When last
+                                  order is playing, music processing
+                                  will be disabled. Use StartMusic to
+                                  reenable.
+                   [default]  1 - Music looping enabled. When last
+                                  order number is finished, music will
+                                  loop back to order zero.
+                             FFh- Don't set the loop enable/disable
+                                  flag.
+
+     Returns:
+         ax    MusicLoop   - Number of times the music has looped
+               (0..255)
+
+     See Also: StartMusic, MusicStatus, StopMusic
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for MusicOrder
+
+  MusicStatus
+  ---------------------------------------------------------------------
+     Purpose:  Get the current music enable status
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicStatus(void);
+      [QB/PDS] DECLARE FUNCTION MusicStatus% ()
+          [TP] Function MusicStatus : Word;
+         [ASM] extrn MusicStatus:far
+
+     Remarks:  none
+
+     Calling:  none
+
+     Returns:
+         ax    MusicStatus - Current music enabled flag:
+                             0 - Music is disabled (StopMusic)
+                             1 - Music is enabled (StartMusic was
+                                 called earlier)
+
+     See Also: StartMusic, StopMusic
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for MixForground
+
+  MusicOrder
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the current playing order position
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicOrder(unsigned char
+               NewOrder);
+      [QB/PDS] DECLARE FUNCTION MusicOrder% (NewOrder%)
+          [TP] Function MusicOrder(NewOrder : Byte) : Byte;
+         [ASM] extrn MusicOrder:far
+
+     Remarks:  This is the routine you'll probably be wanting to use to
+               move around in modules rather than MusicPattern.
+
+     Calling:
+         ah    NewOrder    - New order position to start playing from.
+               (0..FFh)      FFh does not change the order position.
+
+                             Trying to play an order number that does
+                             not exist will play pattern number 0.
+
+     Returns:
+         ax    MusicOrder  - Order position actually in use.
+
+     See Also: MusicPattern, MusicRow
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:
+     [C/C++]----------------------------------------------------------
+     #include <bwsb.h>
+
+     #include <stdio.h>
+     #include <conio.h>
+     #include <io.h>
+     #include <fcntl.h>
+     void main(void)
+     {  int ErrorFlag, Handle, j;
+        int Channels = { 0 };
+        int BaseIO = { 0xFFFF };
+        int IRQ = { 0xFF };
+        int DMA = { 0xFF };
+        char PlayString[] =
+        { "Playing ÄÄ> Order: %u  Pattern: %u  Row: %u  Loops: %u  \r"
+        };
+        GDMHeader ModHead;
+
+        ErrorFlag = LoadMSE("SB1X.MSE", 0, 45, 4096,
+                            &BaseIO, &IRQ, &DMA);
+        if (ErrorFlag)
+        {  printf("Error while loading MSE: %u\n", ErrorFlag);
+           return;                                              }
+
+        if ((Handle = open("TEST.GDM", O_RDONLY | O_BINARY)) == -1)
+        {  printf("Can't find file TEST.GDM\n");
+           return;                                              }
+
+        ErrorFlag = EmsExist && 1;      // Enable EMS use if available
+        LoadGDM(Handle, 0, &ErrorFlag, &ModHead);  close(Handle);
+        if (ErrorFlag)
+        {  printf("Error while loading GDM: %u\n", ErrorFlag);
+           return;                                              }
+
+        // Scan and count number of used music channels
+        // 0xFF is an unused channel, so only inc when not = 0xFF
+        for (j = 0;j < 32;j++)
+          if (ModHead.PanMap[j] != 0xFF) Channels++;
+
+        StartOutput(Channels, 0);       // Enable sound output
+        StartMusic();                   // Start playing the music
+
+        while(!kbhit())                 // Loop until a key is pressed
+        {  printf(PlayString,
+                  MusicOrder(0xFF),     // Order number playing
+                  MusicPattern(0xFF),   // Pattern number playing
+                  MusicRow(),           // Row number playing
+                  MusicLoop(0xFF));  }  // Times music has restarted
+
+        getch();                        // Clear the keyboard buffer
+
+        StopMusic();                    // Stop playing music
+        StopOutput();                   // Disable sound output
+        UnloadModule();                 // Remove module from memory
+        FreeMSE();                      // Remove MSE from memory
+     }
+
+  MusicPattern
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the current playing pattern number
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicPattern(unsigned char
+               NewPattern);
+      [QB/PDS] DECLARE FUNCTION MusicPattern% (NewPattern%)
+          [TP] Function MusicPattern(NewPattern : Byte) : Byte;
+         [ASM] extrn MusicPattern:far
+
+     Remarks:  You will usually not use this function to set the
+               pattern position, use MusicOrder instead.
+
+     Calling:
+         ah    NewPattern  - New pattern number to play. FFh does not
+               (0..FFh)      change pattern number (you will want that
+                             in most cases).
+
+                             Selecting a pattern that does not exist
+                             will most likely crash the system.
+
+     Returns:
+         ax    MusicPattern- Current playing pattern number.
+
+     See Also: MusicRow, MusicOrder
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for MusicOrder
+
+  MusicRow
+  ---------------------------------------------------------------------
+     Purpose:  Get the current playing row number
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicRow(void);
+      [QB/PDS] DECLARE FUNCTION MusicRow% ()
+          [TP] Function MusicRow : Byte;
+         [ASM] extrn MusicRow:far
+
+     Remarks:  There is currently no way to set the current row.
+
+     Calling:  none
+
+     Returns:
+         ax    MusicRow    - Current playing row number.
+
+     See Also: MusicPattern, MusicOrder
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for MusicOrder
+
+  MusicTempo
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the current music tempo
+
+     Syntax:
+       [C/C++] extern unsigned char cdecl MusicTempo(unsigned char
+               NewTempo);
+      [QB/PDS] DECLARE FUNCTION MusicTempo% (NewTempo%)
+          [TP] Function MusicTempo(NewTempo : Byte) : Byte;
+         [ASM] extrn MusicTempo:far
+
+     Remarks:  The default tempo for a MOD is 6.
+
+     Calling:
+         ah    NewTempo    - New tempo value to use. Value of FFh does
+               (FFh, 0..254) not change the current tempo.
+
+     Returns:
+         ax    MusicTempo  - Tempo setting actually in use.
+
+     See Also: MusicBPM
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  MusicVolume
+  ---------------------------------------------------------------------
+     Purpose:  Get or set the global music volume
+
+     Syntax:
+         [C++] extern unsigned char cdecl MusicVolume(unsigned char
+               Vol);
+      [QB/PDS] DECLARE FUNCTION MusicVolume% (Vol%)
+          [TP] Function MusicVolume(Vol : Byte) : Byte;
+         [ASM] extrn MusicVolume:far
+
+     Remarks:  The global music volume is by default set to 64 by any
+               of the module loading routines, except for S3Ms, which
+               are set to the default specified in the module.
+
+     Calling:
+         ah    Vol         - New global music volume to use. FFh does
+               (FFh, 0..64)  not change the global music volume.
+
+     Returns:
+         ax    MusicVolume - The current global music volume.
+               (0..64)
+
+     See Also: none
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  PlaySample
+  ---------------------------------------------------------------------
+     Purpose:  Play a sound effect already loaded into MSE memory
+
+     Syntax:
+       [C/C++] extern void cdecl PlaySample(unsigned char Channel,
+               unsigned char Sample, unsigned int Rate, unsigned char
+               Vol, unsigned char Pan);
+      [QB/PDS] DECLARE SUB PlaySample (Channel%, Sample%, Rate&, Vol%,_
+               Pan%)
+          [TP] Procedure PlaySample(Channel, Sample : Byte; Rate :
+               Word; Vol, Pan : Byte);
+         [ASM] extrn PlaySample:far
+
+     Remarks:  This is for playing sound effects in your programs. It
+               is a rather tedious routine to master, so consult the
+F->            tutorial (BWSB.DOC) for more help.
+
+     Calling:
+         bl    Channel     - Sound channel to play the sound effect on.
+               (1..32)       If you play on a channel that is used by
+                             the music, you'll make the music skip or
+                             cut off notes randomly.
+         cl    Sample      - This is the sample number in the loaded
+               (0..255)      module to play as your sound effect.
+         ax    Rate        - The sampling rate to play the sample at.
+               (4000..44000)
+         dl    Vol         - Volume level to play the sample at.
+               (0..64)       Normally you'll use 64, unless you're
+                             doing a special effect like echoes, etc.
+         dh    Pan         - Pan position between left and right
+               (0..15, FFh)  speakers to play sample at. Note that
+                             values other than 0, 8, and 15 require
+                             additional CPU time (except on GUS):
+
+                              0 - Left Most     8 - Middle
+                             15 - Right Most  FFh - Use Old Position
+
+     Returns:  none
+
+     See Also: none
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  SND-PAD.BAS
+
+  SetAutoMix
+  ---------------------------------------------------------------------
+     Purpose:  Select background mixing or manual foreground mixing
+
+     Syntax
+       [C/C++] extern void cdecl SetAutoMix(char MixFlag);
+      [QB/PDS] DECLARE SUB SetAutoMix (MixFlag%)
+          [TP] Procedure SetAutoMix(MixFlag : Byte);
+         [ASM] extrn SetAutoMix:far
+
+     Remarks:  In some cases it is more desirable to having mixing done
+               in the foreground where it can be interrupted rather
+               than in the background where it takes over the PC for
+               the whole duration required to mix the next buffer (like
+               under Windows, for example).
+
+               In these cases, set the mixing to foreground and then
+               keep a check on the mixing status (MixStatus) and do
+               mixing (MixForground) whenever necessary.
+
+               This has no effect on the GUS.
+
+     Calling:
+         al    MixFlag     - 0 - Mix manually in the foreground.
+                             1 - Mix automatically in the background.
+
+     Returns:  none
+
+     See Also: MixForground, MixStatus
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for MixForground
+
+  StartMusic
+  ---------------------------------------------------------------------
+     Purpose:  Enable music processing
+
+     Syntax:
+       [C/C++] extern void cdecl StopMusic(void);
+      [QB/PDS] DECLARE SUB StartMusic ()
+          [TP] Procedure StartMusic;
+         [ASM] extrn StartMusic:far
+
+     Remarks:  When a module is loaded and sound output is enabled, so
+               can start the module playback using this function. Until
+               music is enabled, no music will be played.
+
+               If you do not have a module loaded (or have a corrupted
+               module loaded), enabling music playback will most likely
+               crash the system because no safety checks are done on
+               the music data.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: StopMusic, MusicStatus
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:
+     [C/C++]-----------------------------------------------------------
+     #include <bwsb.h>
+
+     #include <stdio.h>
+     #include <conio.h>
+     #include <io.h>
+     #include <fcntl.h>
+     void main(void)
+     {  int ErrorFlag, Handle, j;
+        int Channels = { 0 };
+        int BaseIO = { 0xFFFF };
+        int IRQ = { 0xFF };
+        int DMA = { 0xFF };
+        GDMHeader ModHead;
+
+        ErrorFlag = LoadMSE("SB1X.MSE", 0, 45, 4096,
+                            &BaseIO, &IRQ, &DMA);
+        if (ErrorFlag)
+        {  printf("Error while loading MSE: %u\n", ErrorFlag);
+           return;                                              }
+
+        if ((Handle = open("TEST.GDM", O_RDONLY | O_BINARY)) == -1)
+        {  printf("Can't find file TEST.GDM\n");
+           return;                                              }
+
+        ErrorFlag = EmsExist && 1;      // Enable EMS use if available
+        LoadGDM(Handle, 0, &ErrorFlag, &ModHead);  // Load the GDM file
+        close(Handle);
+
+        if (ErrorFlag)                  // Was there an error loading?
+        {  printf("Error while loading GDM: %u\n", ErrorFlag);
+           return;                                              }
+
+        // Scan and count number of used music channels
+        // 0xFF is an unused channel, so only inc when not = 0xFF
+        for (j = 0;j < 32;j++)
+          if (ModHead.PanMap[j] != 0xFF) Channels++;
+
+        StartOutput(Channels, 0);       // Enable sound output with
+                                        // no amplification.
+
+        StartMusic();                   // Start playing the music
+        printf("Music should now be playing\n");
+        printf("Press any key to stop music..\n");
+
+        getch();                        // Wait for a keypress to stop
+
+        StopMusic();                    // Stop playing music
+        printf("Music has been stopped\n");
+
+        StopOutput();                   // Disable sound output
+        UnloadModule();                 // Remove module from memory
+        FreeMSE();                      // Remove MSE from memory
+     }
+
+  StartOutput
+  ---------------------------------------------------------------------
+     Purpose:  Initialize and enable the sound output routines
+
+     Syntax:
+       [C/C++] extern unsigned int cdecl StartOutput(unsigned char
+               Channels, unsigned char Amplify);
+      [QB/PDS] DECLARE FUNCTION StartOutput& (Channels%, Amplify%)
+          [TP] Function StartOutput(Channels, Amplify : ShortInt)
+               : Word;
+         [ASM] extrn StartOutput:far
+
+     Remarks:  No sound will be playable until sound output is enabled
+               with this routine. When sound output is enabled, a small
+               amount of CPU time is used to keep the output stream
+               flowing, so try to keep sound output enabled *only* when
+               you need to have sound/music playing.
+
+               If sound output is already enabled, this routine will
+               have no effect.
+
+     Calling:
+         al    Channels    - Total number of output channels to enable.
+               (1..32)       More output channels require more CPU time
+                             and diminish overall sound quality, so use
+                             as few as possible.
+         n/a   Amplify     - Amplification level. Too high a value will
+               (0..9)        cause clicks and cracks in the output.
+                             Under normal use, use amplification 0. If
+                             you know that a value greater than that
+                             won't cause clicks, by all means use it
+                             because it will increase sound fidelity.
+
+                             This value is ignored on the GUS.
+
+     Returns:
+         ax    StartOutput - Actual oversampling rate (in Hz) used.
+
+     See Also: StopOutput
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for StartMusic
+
+  StopBanner
+  ---------------------------------------------------------------------
+     Purpose:  Disables the signoff banner in the unregistered version
+
+     Syntax:
+       [C/C++] extern void cdecl StopBanner(void);
+      [QB/PDS] DECLARE SUB StopBanner ()
+          [TP] Procedure StopBanner;
+         [ASM] extrn StopBanner:far
+
+     Remarks:  This must be called before FreeMSE is called to be
+               effective.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: none
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  none
+
+  StopMusic
+  ---------------------------------------------------------------------
+     Purpose:  Disable music processing
+
+     Syntax:
+       [C/C++] extern void cdecl StopMusic(void);
+      [QB/PDS] DECLARE SUB StopMusic ()
+          [TP] Procedure StopMusic;
+         [ASM] extrn StopMusic:far
+
+     Remarks:  Stopping the music also saves a tiny amount of CPU time.
+               This routine does *not* turn off all music channels so
+               after this call there will possibly be some samples
+               still playing if any looped samples were being played.
+
+               Note, you *must* disable music processing before
+               unloading the current module (UnloadModule). Not doing
+               so will probably end up in a system crash at some point
+               later on when music data is overwritten.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: StartMusic, MusicStatus
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for StartMusic
+
+  StopOutput
+  ---------------------------------------------------------------------
+     Purpose:  Turns off all sound output processing
+
+     Syntax:
+       [C/C++] extern void cdecl StopOutput(void);
+      [QB/PDS] DECLARE SUB StopOutput ()
+          [TP] Procedure StopOutput;
+         [ASM] extrn StopOutput:far
+
+     Remarks:  Once this is called, no more sound can be played until
+               StartOutput is called again. It is generally used to
+               shut off all output while more data is transferred to or
+               from the disk since disk transferring is generally quite
+               a bit slower when sound output is running.
+
+               If sound output is already off, this routine has no
+               effect.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: StartOutput
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for StartMusic
+
+  UnloadModule
+  ---------------------------------------------------------------------
+     Purpose:  Free all memory used by the current music file
+
+     Syntax:
+       [C/C++] extern void cdecl UnloadModule(void);
+      [QB/PDS] DECLARE SUB UnloadModule ()
+          [TP] Procedure UnloadModule;
+         [ASM] extrn UnloadModule:far
+
+     Remarks:  This routine must be called before loading a new music
+               file. Once it is called, do not enable music processing,
+               for the music data may get overwritten after this call.
+               In that case, the invalid music data would probably
+               cause a system crash.
+
+     Calling:  none
+
+     Returns:  none
+
+     See Also: LoadGDM
+
+     Source:   C_MSE.ASM, QBX_MSE.ASM, TPX_MSE.ASM
+
+     Example:  See example for LoadGDM

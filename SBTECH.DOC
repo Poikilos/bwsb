@@ -1,0 +1,431 @@
+
+                       Bells, Whistles, and Sound Boards
+
+                    SOUND BLASTER FAMILY TECHNICAL REFERENCE
+
+                    Copyright (c) 1993-97, Edward Schlunder
+                   See COPYING.ES for redistribution details.
+
+
+Contents:
+        1.      Introduction
+        1.1     I/O Address Map
+        1.2     DSP Commands
+        1.3     Mixer Registers
+
+Part 1. Introduction
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+          This information is from personal experimentation, information
+        gathered by other people, and by examining other people's source
+        code. It was gathered from many sources and therefore may contain
+        errors or omissions. I do not claim that any of this is "official"
+        in any way. If you find anything incorrect, please help others by
+        emailing to correction(s) to zilym@hndymn.stat.com.
+
+1.1 I/O Address Map
+
+      Possible Base I/O: 210h, 220h, 230h, 240h (SB 1.xx)
+                         220h, 240h             (All others)
+
+      Possible IRQ:      2, 3, 5, 7             (SB 1.xx)
+                         2, 5, 7, 10            (All others)
+
+      Possible DMA:      1                      (SB 1.xx)
+                         0, 1, 3                (SB 2.xx/SB Pro)
+
+   -ÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄ-
+    Û I/O Address Û  Description/Usage                   Û Read/Write    Û
+   -ÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄ-
+      Base + 0h      Left FM music Status Port            ş Read       ş
+      Base + 0h      Left FM music Register Address Port  ş Write      ş
+      Base + 1h      Left FM music Data Port              ş Write      ş
+
+      Base + 2h      Right FM music Status Port           ş Read       ş
+      Base + 2h      Right FM music Register Address Port ş Write      ş
+      Base + 3h      Right FM music Data Port             ş Write      ş
+
+      Base + 4h      Mixer chip Register Address Port     ş Write      ş
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                               Register Number Ù
+
+            See 'Mixer Registers' for details on all Mixer
+         Registers.
+
+      Base + 5h      Mixer chip Data Port                 ş Read/Write ş
+
+               After writing the Mixer register to read/write
+            on the 'Mixer chip Register Address Port', read or
+            write that register on this port. Data returned
+            varies on the register. See 'Mixer Registers' for
+            details.
+
+      Base + 6h      DSP Reset                            ş Write      ş
+
+               This is how you reset the DSP:
+
+                  1. Send 1 to this port
+                  2. Wait 3.3 microseconds
+                  3. Send 0 to this port
+                  4. Read from this port
+                  5. If value read equals 0AAh, DSP was reset correctly
+                  6. If value isn't 0AAh go back to step 4
+                  7. If you have looped through steps 4-6 over 32
+                     times and you haven't found 0AAh, then the DSP
+                     wasn't correctly reset.
+
+      Base + 8h      FM music Status Port                 ş Read       ş
+      Base + 8h      FM music Register Address Port       ş Write      ş
+      Base + 9h      FM music Data Port                   ş Write      ş
+
+      Base + 0Ah     DSP Read Data                        ş Read       ş
+      Base + 0Ch     DSP Write Data or Command            ş Write      ş
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                              Data or Register Ù
+
+               See 'DSP Registers' for details on all DSP registers.
+
+      Base + 0Ch     DSP Write Buffer Status              ş Read       ş
+
+                                 7 6 5 4 3 2 1 0
+                                 ³ * * * * * * *
+            Available Status Bit Ù
+
+               Available Status:
+                  0 -   Ready for data at Base + 0Ch
+                  1 -   Not ready for data
+
+      Base + 0Eh     DSP Data Available Status            ş Read       ş
+
+                                 7 6 5 4 3 2 1 0
+                                 ³ * * * * * * *
+            Available Status Bit Ù
+
+               Available Status:
+                  0 -   No data available at Base + 0Ah
+                  1 -   Data available at Base + 0Ah
+
+      Base + 0Eh     8 Bit DMA IRQ Acknowledge port       ş Read       ş
+
+               Read this port after every 8 Bit DMA
+            transferred sound. This is usually done by the
+            IRQ handler set up before the transfer.
+
+      Base + 0Fh     16 Bit DMA IRQ Acknowledge port      ş Read       ş
+
+               Read this port after every 16 Bit DMA
+            transferred sound. This is usually done by the
+            IRQ handler set up before the transfer.
+
+      388h           FM music Status Port                 ş Read       ş
+      388h           FM music Register Address Port       ş Write      ş
+      389h           FM music Data Port                   ş Write      ş
+
+1.2 DSP Commands
+
+   S-      Send
+           1. Read from Base+0Ch
+           2. Loop to 1 until Bit7 is clear
+           3. Write to Base+0Ch
+
+   R-      Read
+           1. Read from Base+0Eh
+           2. Loop to 1 until Bit7 is set
+           3. Read from Base+0Ah
+
+   NOT(x)- Logical NOT, (NOT x)
+           ex:   x=F1F2h. NOT x=0E0Dh
+
+   LSB(x)- Least Significant Byte (x MOD 256)
+           ex:   x=F1F2h. LSB(x)=F2h
+
+   MSB(x)- Most Significant Byte (x \ 256)
+           ex:   x=F1F2h. MSB(x)=F1h
+
+ CMD  VERSION(S)     PURPOSE/USAGE
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ 010h 1.x-4.x        Play one Sample
+                     S:10h, S:Sample
+
+ 014h 1.x-4.x        Start Low Speed DMA Playback Transfer (8 Bit)
+                     S:14h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 017h 1.x-4.x        Start Low Speed DMA Playback Transfer (2 Bit ADPCM)
+                     S:17h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 01Ch 2.x-4.x        Start Low Speed Autoinit DMA Playback Transfer (8 Bit)
+                     S:1Ch
+
+ 020h 1.x-4.x        Record One Sample
+                     S:20h, R:Sample
+
+ 024h 1.x-4.x        Start Low Speed DMA Recording Transfer (8 Bit)
+                     S:24h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 040h 1.x-4.x        DMA Set Sample Rate
+                     S:40h, S:Sample Divisor
+
+                     Sample Divisor = 256 - (1,000,000 \ Sample Rate)
+
+ 041h 4.x            DMA Set Output Sample Rate (For commands Bxh & Cxh)
+                     S:41h, S:MSB(Sample Rate), S:LSB(Sample Rate)
+
+ 042h 4.x            DMA Set Input Sample Rate (For commands Bxh & Cxh)
+                     S:42h, S:MSB(Sample Rate), S:LSB(Sample Rate)
+
+ 048h 2.x-4.x        DMA Set Transfer Length (Commands 1Ch, 91h, 99h, 90h)
+                     S:48h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 074h 1.x-4.x        Start Low Speed DMA Playback Transfer (4 Bit ADPCM)
+                     S:74h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 077h 1.x-4.x        Start Low Speed DMA Playback Transfer (2.6 Bit ADPCM)
+                     S:77h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 080h 1.x-4.x        Output Silent Block
+                     S:80h, S:LSB(Length-1), S:MSB(Length-1)
+
+ 090h 3.x            Start High Speed Autoinit DMA Playback Transfer (8 Bit)
+                     S:90h
+
+ 091h 2.x-4.x        Start High Speed DMA Playback Transfer (8 Bit)
+                     S:91h
+
+ 099h 2.x-4.x        Start High Speed DMA Recording Transfer (8 Bit)
+                     S:99h
+
+ 0Byh 4.x            Start 16Bit DMA Transfer
+                     S:Byh, S:Mode, S:LSB(Length-1), S:MSB(Length-1)
+
+                        Starts a 16Bit input/output DMA transfer. Note that
+                     part of the command is used for data (y)..
+
+                  Command equals:   7 6 5 4 3 2 1 0
+                             Keep 1 Ù ³ ³ ³ ³ ³ ³ À Keep 0
+                               Keep 0 Ù ³ ³ ³ ³ À 0=No FIFO, 1=16 Byte FIFO
+                                 Keep 1 Ù ³ ³ À 0=Single Cycle, 1=Autoinit
+                                   Keep 1 Ù À 0=Play 1=Record
+
+                     Mode equals:   7 6 5 4 3 2 1 0
+                             Keep 0 ÁÄÙ ³ ³ ÀÄÄÄÄÄÁ Keep 0
+                        0=Mono 1=Stereo Ù ³
+                      0=Unsigned 1=Signed Ù
+
+ 0Cyh 4.x            Start 8Bit DMA Transfer
+                     S:Cyh, S:Mode, S:LSB(Length-1), S:MSB(Length-1)
+
+                        Starts an 8Bit input/output DMA transfer.  Note that
+                     part of the command is used for data (y)..
+
+                  Command equals:   7 6 5 4 3 2 1 0
+                             Keep 1 Ù ³ ³ ³ ³ ³ ³ À Keep 0
+                               Keep 0 Ù ³ ³ ³ ³ À 0=No FIFO, 1=16 Byte FIFO
+                                 Keep 1 Ù ³ ³ À 0=Single Cycle, 1=Autoinit
+                                   Keep 1 Ù À 0=Play 1=Record
+
+                     Mode equals:   7 6 5 4 3 2 1 0
+                             Keep 0 ÁÄÙ ³ ³ ÀÄÄÄÄÄÁ Keep 0
+                        0=Mono 1=Stereo Ù ³
+                      0=Unsigned 1=Signed Ù
+
+ 0D0h 1.x-4.x        Pause 8Bit DMA Transfer
+                     S:D0h
+
+ 0D1h 1.x-4.x        Turn on DAC Output (no effect on DSP v4.x)
+                     S:D1h
+
+ 0D3h 1.x-4.x        Turn off DAC Output (no effect on DSP v4.x)
+                     S:D3h
+
+ 0D4h 1.x-4.x        Continue Paused 8Bit DMA Transfer
+                     S:D0h
+
+ 0D5h 4.x            Pause 16Bit DMA Transfer
+                     S:D5h
+
+ 0D6h 4.x            Continue Paused 16Bit DMA Transfer
+                     S:D6h
+
+ 0D8h 1.x-4.x        Read DAC Output Status
+                     S:0D8h, R:Output Status (00=Disabled, FF=Enabled)
+
+ 0D9h 4.x            Exit Autoinit Mode (16Bit)
+                     S:D9h
+
+ 0DAh 4.x            Exit Autoinit Mode (8Bit)
+                     S:DAh
+
+ 0E0h 1.x-4.x        Get DSP ID
+                     S:E0h, S:tstval, R:NOT(tstval)
+
+ 0E1h 1.x-4.x        Get DSP Version Number
+                     S:E1h, R:Major Version, R:Minor Version
+
+                     Ver:   Card Name:      Feature Addition:
+                     1.xx   SB 1.xx         + low speed DMA transfers
+                     2.xx   SB 2.xx         + high speed DMA transfers
+                                            + DMA autoinitialize mode
+                     3.00   SB Pro original + stereo FM/digital output
+                     3.01   (same)
+                     3.02   SB Pro-2        + OPL3 FM
+                     4.xx   SB16            + 16Bit output
+                                            + High Speed stereo DMA transfers
+
+ 0E3h 1.x-4.x        Get Card Copyright String
+                     ??
+
+ 0E4h 1.x-4.x        Get DSP ID #2
+                     S:E4h, S:AAh, S:E8h, R:AAh
+
+ 0F2h 1.x-2.x        Raise IRQ Line
+                     S:F2h, (IRQ Occurs)
+
+1.3 Mixer Registers
+
+ REGISTER NO.      PURPOSE/USAGE                      VERSION(S)
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ 00h               Reset Mixer                        3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                     Any value Ù
+
+                         Just send the Mixer 0 then an other number (any
+                         will do) to reset it to the power on state.
+
+ 04h               Voice Volume                       3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄ´ ÃÄÄÄÄÄÙ
+                                  Left Ù À Right
+
+ 0Ah               Microphone Volume                  3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 * * * * * ÃÄÄÄÙ
+                                           À Recording Volume
+
+ 0Ch               Input Filter                       3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 * * ³ * ³ ÃÄÙ *
+                       Filter Enable Ù   ³ À Input Source
+                                         À Filter Select
+
+
+                       Filter Select:          Input Source:
+                       0 -    Low Frequency    00 -   Microphone
+                       1 -    High Frequency   01 -   CD
+                                               11 -   Line-in
+
+ 0Eh               Output Filter                      3.x-4.x
+                                 7 6 5 4 3 2 1 0
+                                 * * ³ * * * ³ *
+                       Filter Enable Ù       À Stereo Enable
+
+                       Filter Enable:
+                       0 -    DNFI Filter enabled
+                       1 -    DNFI Filter disabled
+
+                       Stereo Enable:
+                       0 -    Digital Sound output is Mono
+                       1 -    Digital Sound output is Stereo (DMA mode only)
+
+ 022h              Master Volume                      3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄ´ ÃÄÄÄÄÄÙ
+                                  Left Ù À Right
+
+ 026h              FM Music Volume                    3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄ´ ÃÄÄÄÄÄÙ
+                                  Left Ù À Right
+
+ 028h              CD Volume                          3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄ´ ÃÄÄÄÄÄÙ
+                                  Left Ù À Right
+
+ 02Eh              Line-in Volume                     3.x-4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄ´ ÃÄÄÄÄÄÙ
+                                  Left Ù À Right
+
+ 030h              Master Volume Left                 4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                          Left Ù
+
+ 031h              Master Volume Left                 4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                         Right Ù
+
+ 032h              Voice Volume Left                  4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                          Left Ù
+
+ 033h              Voice Volume Right                 4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                         Right Ù
+
+ 034h              FM Volume Left                     4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                          Left Ù
+
+ 035h              FM Volume Right                    4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                         Right Ù
+
+ 036h              CD Volume Left                     4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                          Left Ù
+
+ 037h              CD Volume Right                    4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                         Right Ù
+
+ 038h              Line-in Volume Left                4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                          Left Ù
+
+ 039h              Line-in Volume Right               4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                         Right Ù
+
+ 03Ah              Microphone Volume                  4.x
+
+                                 7 6 5 4 3 2 1 0
+                                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                                       Mic Vol Ù
+
+ 03Bh              ???                                4.x
+ 03Dh              ??? Left Volume                    4.x
+ 03Eh              ??? Right Volume                   4.x
+

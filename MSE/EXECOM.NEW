@@ -1,0 +1,26 @@
+                            EXECOM Version History
+
+
+
+
+ EXECOM 1.2     05/09/89
+    No practical change.  Minor code tweaking produced a slightly smaller
+    executable file.
+
+
+
+ EXECOM 1.1     03/19/88
+    The DOS error level is now set on exit, so your batch files can see if
+    everything worked.  If there is an error, a nonzero code is returned.
+
+    The original .EXE file is now deleted on successful completion, since
+    it is no longer needed.
+
+
+
+ EXECOM 1.0     03/15/88
+    Original release, compatible with the EXE2BIN utility except for:
+    1) A default output extension of .COM instead of .BIN
+    2) No support for segment fixups
+
+    This is both smaller and faster than EXE2BIN.

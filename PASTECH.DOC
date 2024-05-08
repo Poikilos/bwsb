@@ -1,0 +1,116 @@
+
+                        Bells, Whistles, and Sound Boards
+
+                 PRO AUDIO SPECTRUM FAMILY TECHNICAL REFERENCE
+
+                    Copyright (c) 1993-97, Edward Schlunder
+                   See COPYING.ES for redistribution details
+
+
+Contents:
+        1.      Introduction
+        1.1     I/O Address Map
+        1.2     MVSOUND.SYS
+
+Part 1. Introduction
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+          This information is from personal experimentation, information
+        gathered by other people, and by examining other people's source
+        code. It was gathered from many sources and therefore may contain
+        errors or omissions. I do not claim that any of this is "official"
+        in any way. If you find anything incorrect, please help others by
+        emailing to correction(s) to zilym@hndymn.stat.com.
+
+1.1 I/O Address Map
+
+ Possible Pro AudioSpectrum Configurations:           [] - Factory Default
+      Base I/O: [388h], 384h, 38Ch, 388h
+      IRQ:      2, 3, [5], 7, 10, 11, 12, 15
+      DMA:      0, [3], 5, 6, 7 (DMA 1 is used for hardware SB emulation)
+
+   -ÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄ-
+    Û I/O Address Û  Description/Usage                   Û Read/Write    Û
+   -ÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄ-
+      B88h           Audio Mixer Control                  ş Read/Write ş
+      B8Ah           Audio Filter Control                 ş Read/Write ş
+                                 7 6 5 4 3 2 1 0
+           Sample Counter Enable Ù ³ ³ ÃÄÄÄÄÄÄÄÙ
+                Sample Rate Enable Ù ³ À Filter Select:
+            Output Mute(0)/Enable(1) Ù   00000 - None [default]
+                                         00001 - 17897 Hz
+                                         00010 - 15909 Hz
+                                         01001 - 11931 Hz
+                                         10001 - 8948 Hz
+                                         11001 - 5965 Hz
+                                         00100 - 2982 Hz
+                                       
+      B89h           Interrupt Control Status             ş Read/Write ş
+      B8Bh           Interrupt Control                    ş Write      ş
+                                 7 6 5 4 3 2 1 0
+           Board Revision Number ÁÄÄÄÙ ³ ³ ³ ³ À Left FM IRQ Enable
+                       MIDI IRQ Enable Ù ³ ³ À Right FM IRQ Enable
+                                         ³ À Sample Rate Timer enable
+                                         À Sample Count timer enable
+
+      B8Bh           Interrupt Control read back          ş Read       ş
+      F88h           PCM Direct Data I/O LSB              ş Read/Write ş
+      F89h           PCM Direct Data I/O MSB (for 16bit)  ş Read/Write ş
+      F8Ah           Cross Channel Control                ş Read/Write ş
+                                 7 6 5 4 3 2 1 0
+                 DRQ Hook Enable Ù ³ ³ ³ ³ ³ ³ À Connect RIN->ROUT
+          PCM State Machine Enable Ù ³ ³ ³ ³ À Connect LIN->ROUT
+            Mono(1)/Stereo(0) Output Ù ³ ³ À Connect RIN->LOUT
+                         DAC(1)/ADC(0) Ù À Connect LIN->LOUT
+
+      1388h          Sample Rate Timer (t0)               ş Read/Write ş
+      1389h          Sample Byte Count                    ş Read/Write ş
+      138Bh          Local Timer Control                  ş Read/Write ş
+                                 7 6 5 4 3 2 1 0
+                    Timer Select ÁÄÙ ÃÄÙ ÃÄÄÄÙ À BCD (1)/Binary (0)
+                          Read/Write Ù   À Timer Mode
+   
+      8388h          System Config 1                      ş Read/Write ş
+      8389h          Sample Configuration                 ş Read/Write ş
+                                 7 6 5 4 3 2 1 0
+   VCO Locked (Rate Clock Valid) Ù ÃÄÙ ³ ³ ³ ÀÄÁ Oversample 1x, 2x, 4x
+                   Slave Port Bits Ù   ³ ³ À 16bit(1)/8bit(0)
+                 Signed(1)/Unsigned(0) Ù À 12bit Interleaving (b2 set)
+
+      838Ah          System Config 3                      ş Read/Write ş
+      838Bh          System Config 4                      ş Read/Write ş
+
+ ÄÄÄÄÄÄ MVSOUND.SYS ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ                   5.4.2.0
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Function:     0, Int 2Fh
+ Description:  Verifies that MVSOUND.SYS is loaded.
+ Calling:      ax = BC00h
+               bx = '??'
+               cx = 0
+               dx = 0
+ Returns:      xor bx, cx
+               xor bx, dx
+               bx = 'MV' if MVSOUND.SYS is installed
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Function:     1, Int 2Fh
+ Description:  Get MVSOUND.SYS Version
+ Calling:      ax = BC01h
+               bx = 'm '
+               cx = ' v'
+               dx = '  '
+ Returns:      bx      ASCII major version
+               cx      ASCII minor version
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Function:     2, Int 2Fh
+ Description:  Get Pro AudioSpectrum State Table Address
+ Calling:      ax = BC02h
+ Returns:      bx:dx   PAS state table address
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Function:     3, Int 2Fh
+ Description:  Get Pro AudioSpectrum State Table Address
+ Calling:      ax = BC02h
+ Returns:      bx:dx   PAS state table address

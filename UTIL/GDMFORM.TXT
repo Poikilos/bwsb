@@ -1,0 +1,382 @@
+  NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE!
+  -----------------------------------------------------------------------
+    This file format document is very out of date. I would appreciate
+    someone going through 2GDM.BAS and update this to the current
+    format specification. I currently don't have the time to redocument
+    the whole thing and most people don't need it. I wrote this
+    document far before 2GDM was any where near complete, so it was
+    mostly just to layout my own thoughts correctly.
+  -----------------------------------------------------------------------
+  NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE! NOTICE!
+
+General Digital Music Format Specification v1.00
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+Copyright (c) 1994-95, Edward Schlunder
+Permission granted to freely redistribute
+in complete and unmodified form.
+
+
+Contents
+ฤฤฤฤฤฤฤฤ
+1. INTRODUCTION
+2. FILE FORMAT
+3. EFFECTS
+4. LOADING
+5. PLAYING
+
+Introduction
+ฤฤฤฤฤฤฤฤฤฤฤฤ
+
+      What is a "General Digital Music" (or GDM as we call it) file you
+   ask? Well, it is a digital music file format developed by Zilym Limms
+   and OTM for our music and sound engine. Because (at the time) there 
+   were no publically available pattern compressing file format 
+   specifications, we developed our own (the only format close to 
+   GDMs was AMF, which specifications weren't published). After 
+   much work, we now have the GDM file format you see before you now.
+
+File Format
+ฤฤฤฤฤฤฤฤฤฤฤ
+
+Note:
+      All ASCIIZ strings in GDMs have ALL unused bytes filled with zeros.
+   This does NOT mean that only the first unused byte is zero and the rest
+   can be anything. For example, let's say the fixed length of the string
+   is 32 characters. The string is only 14 bytes long.. The string written
+   to the GDM would look like:
+
+   "Red Ryder v1.2", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+                            GDM Header Structure
+                            ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+[ZB] - Zero Based  [AZ] - ASCIIZ
+[OB] - One Based
+
+LOCATION  LENGTH     DESCRIPTION
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+  0-3     4          Identification string- 'GDMþ'
+  4-35    32    [AZ] Song Title
+ 36-67    32    [AZ] Song Musician
+ 68-70    3          End Of File marker- 13, 10, 26
+ 71-74    4          Identification string- 'GMFS'
+ 75-75    1          Format Specification Major Version- 01h (v1.00)
+ 76-76    1          Format Specification Minor Version- 00h
+ 77-78    2          Tracker Identification Number
+                      00- 2GDM Converter
+ 79-79    1          Tracker Major Version Number
+ 80-80    1          Tracker Minor Version Number
+ 81-187   32         Initial Panning Map (also used to find number of
+                      00- Full left       used channels)
+                      08- Middle
+                      15- Full right
+                      16- Surround
+                      FF- Channel not used
+188-188   1          Initial Master Volume (Range 0 to 128)
+189-189   1          Initial Music Tempo (Range: 1 to 255)
+190-190   1          Initial Music Beats Per Minute (Range: 32 to 255)
+191-192   2          Music Flags
+                      Bit   Description
+                      00-03 Effect Implementation:
+                             0- Fortezza Tracker
+                             1- Amiga Protracker
+                             2- Multitracker 1.01
+                             3- Scream Tracker 3.01
+                             4- Composer 669 & Unis
+                             5- Farandole Composer
+                             6- UltraTracker
+                            >6- Reserved
+                      04-15 Reserved, keep zero!
+193-196   4     [ZB] Offset of Order Table
+197-197   1     [ZB] Number of Orders Saved
+198-201   4     [ZB] Offset of Pattern Data
+202-202   1     [ZB] Number of Patterns Saved
+203-206   4     [ZB] Offset of Sample Header Table
+207-210   4     [ZB] Offset of Sample Data
+211-211   1     [ZB] Number of Samples Saved
+212-215   4     [ZB] Offset of Message Text
+216-219   4     [OB] Length (in bytes) of Message Text
+220-223   4     [ZB] Offset of Scrolly Script
+224-225   2     [OB] Length (in bytes) of Scrolly Script
+226-229   4     [ZB] Offset of Text Graphic
+230-231   2     [OB] Length (in bytes) of Text Graphic
+
+                           Sample Header Structure
+                           ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+LOCATION  LENGTH     DESCRIPTION
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+  0-31    32    [AZ] Name of Instrument
+ 32-44    13    [AZ] File Name
+ 45-48    4     [OB] Length
+ 49-52    4     [ZB] Loop Beginning Offset
+ 53-56    4     [ZB] Loop Ending Offset
+ 57-57    1          Flags
+                      Bit   Description
+                      00    Loop Enable
+                      01    16Bit Sample (Lo, Hi Order)
+                      02    Default Volume
+                      03    Default Panning
+                      04    Reserved (Future: LZW Compressed)
+                      05    Stereo Sample (Left, Right order)
+                     >05    Reserved, keep zero!
+
+                      00    (Internal: Right Channel Used   )
+                      01    (Internal: Left Channel Used    )
+                      02    (Internal: Surround Channel Used)
+
+                             [Internal Flags:               ]
+                             [000 - Sample Vol = 0          ]
+                             [001 - Right Only, Left Vol = 0]
+                             [010 - Left Only, Right Vol = 0]
+                             [011 - Panned Sample           ]
+                             [100 - Sample Off (Inc/Dec=0)  ]
+                             [101 - Stereo Left/Right       ]
+                             [110 - Stereo Vol = 0          ]
+                             [111 - Surround Sound          ]
+
+                      03    0-08 Bit, 1-16 Bit
+                      04    0-Unidirectional, 1-Bidirectional
+                      05    0-Inc Offset, 1-Dec Offset
+                      06    0-Stop on End, 1-Loop on End
+                      07    (Internal: Base/EMS)
+
+ 58-59    2          C-4 Hertz Finetune (8363 default)
+ 60-60    1          Sample Default Volume (FFh if none)
+ 61-61    1          Sample Default Pan Position
+                      00- Full left
+                      08- Middle
+                      15- Full right
+                      16- Surround
+                      FF- No Default Pan
+
+                             Pattern Format
+                             ฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+ BYTE: what     &31=Channel
+
+                &32=follows: BYTE: note, BYTE: sample
+                    Note: 7th bit of note is used for no retrig
+                          flag. Mask off on reading
+
+                &64=follows: BYTE: Effect, BYTE: Effect Data
+                           7 6 5 4 3 2 1 0
+            Effect Channel มฤู ณ ภฤฤฤฤฤฤฤม Effect number
+        Another Effect Follows ู
+
+               &128=Reserved
+
+                                 Effects
+                                 ฿฿฿฿฿฿฿
+Note: All numbers stated are in Hexidecimal form.
+
+FX   DESCRIPTION
+อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+00xx No Effect
+01xx Portamento Up (x=periods/frame)
+02xx Portamento Down (x=periods/frame)
+03xx Porta to Note (x=periods/frame)
+04xy Vibrato (x=speed, y=depth)
+05xy Porta to Note+Volume Slide (300+Axy)
+06xy Vibrato+Volume Slide (400+Axy)
+07xy Tremolo (x=speed, y=depth)
+08xy Tremor (x=ontime, y=offtime)
+09xx Sample Offset (offset=xx00h)
+0Axy Volume Slide (x=up speed, y=down speed)
+0Bxx Order Jump (x=order)
+0Cxx Set Volume (x=volume)
+0Dxx Pattern Break (x=row to break to)
+0E0x Set Low Pass Filter (x=0 off, x=1 on)
+0E1x Fine Porta Up (x=periods)
+0E2x Fine Porta Down (x=periods)
+0E3x Glissando Control (x=0 smooth slide, x=1 semitone slide)
+0E4x Set Vibrato Waveform (x=0 sine, x=1 ramp down, x=2 square, x=3 random)
+0E5x Set C-4 Finetune (x=finetune)
+0E60 Set Loop Start Row
+0E6x Start Looping (x=loop x times)
+0E7x Set Tremolo Waveform (x=0 sine, x=1 ramp down, x=2 square, x=3 random)
+0E8x Extra Fine Porta Up (x=quarter periods)
+0E9x Extra Fine Porta Down (x=quarter periods)
+0EAx Fine Volume Slide Up (x=volumes)
+0EBx Fine Volume Slide Down (x=volumes)
+0ECx Note Cut (x=frame to cut note)
+0EDx Note Delay (x=frame to start note)
+0EEx Pattern Delay with Effect Continue (x=rows to delay)
+0EFx Invert Loop (x=invert speed)
+0F00 Stop/End Song
+0Fxx Set Tempo (x=tempo)
+10xx Arpeggio (note+0, note+x, note+y)
+11xy Set Internal Flag (x=flag number, y=new value)
+12xy Retrig Note+Volume Slide (x=volume slide, y=frames for retrig delay)
+13xx Set Global Volume (x=global volume)
+14xy Fine Vibrato (x=speed, y=depth)
+1E0x Specail:
+     1E00 - Surround Off
+     1E01 - Surround On
+     1E02 - Unidirectional
+     1E03 - Bidirectional
+     1E04 - Forward (increment offset)
+     1E05 - Backward (decrement offset)
+     1E06 - Mono Sample
+     1E07 - Stereo Sample
+     1E08 - Stop sample on End
+     1E09 - Loop sample on End
+
+1E8x Set Pan Position (x=0 left, x=8 middle, x=F right)
+1EDx Frequency Adjust (x=Hz to add)
+1Fxx Set BPM (x=BPM, range 20..FF)
+
+NOTICE! Much of the below text has been taken directly
+from the Protracker v2.1 documentation. We would like
+to give credit to Amiga Freelancers for the below text.
+
+Pitch Effect Details
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+Cmd 000. No Effect [No Data]
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+None
+
+Cmd 0xy Arpeggio  [Range:x=0-F y=0-F]
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+Usage: x = 1st halfnote add
+       y = 2nd halfnote add
+
+   Arpeggio   is  used   to  simulate
+chords  or very  heavy vibratos. This
+works  by rapidly  changing the pitch
+between  3  (or 2)  different  notes,
+each frame.  It sounds very noisy and
+grainy  on  most samples, but okay on
+monotone ones.
+
+Examples:
+C-3 147 (C+E+G or C+4+7 halfnotes)
+C-3 137 (C+D#+G or C+3+7 halfnotes)
+
+Cmd 2xx Portamento Down [Speed:00-FF]
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+Usage: x = Number of periods to slide
+           each frame
+
+   Portamento  down will simply slide
+the sample pitch down. If Amiga porta
+limits  are enabled (see Music Flags,
+bit  0 in the GDM header), the lowest
+you can slide to is C-3.
+
+Example:
+C-4 203 (2 is the command, 03 is the
+         slide speed)
+Note:
+The portamento will be called as many
+times as the tempo of the song. This
+means that you'll sometimes have
+trouble sliding accuratly. If you
+change the tempo without changing the
+sliderates, it will sound bad...
+
+
+Cmd 3xx Portamento Up [Speed:00-FF]
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+Usage: x = Number of periods to slide
+           each frame
+
+   Just  like command  2, except that
+this  one  will  slide  the  pitch up
+instead (subtracts from the period).
+If Amiga porta limits are enabled,
+the highest you can slide to is B-5.
+
+Example:
+C-4 303 (2 is the command, 03 is the
+         slide speed)
+
+Cmd 4xy Vibrato [Rate:0-F, Depth:0-F]
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+Usage: x = Vibrato rate (speed)
+           0 specifies to use the
+           previous rate
+       y = Vibrato depth
+           0 specifies to use the
+           previous depth
+
+Vibrato vibrates the sample's pitch.
+To keep on vibrating, just select the
+command 400. To change the vibrato,
+you can alter the rate, depth, or
+both. Use command E5y to change the
+vibrato waveform.
+
+Example:
+C-3 481 (2 is the command, 8 is the
+         speed of the vibrato, 1 is
+         the depth of the vibrato)
+
+Cmd E1y Fineslide Down [Range: 00-FF]
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+Usage: y = periods to add to note
+
+
+
+E2y Fineslide Up by y=periods
+E3y Extra Fineslide Down by y=fine periods
+E4y Extra Fineslide Up by y=fine periods
+E5y Vibrato Waveform: Sine, Ramp Down, Square, Random
+E5E Glissando Disable
+E5F Glissando Enable
+E6y Set C-4 finetune.
+
+Volume Effects Details
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+FX  DESCRIPTION
+อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+0xx No Effect
+1xx Set Volume to x
+2xx Volume Slide Down by x
+3xx Volume Slide Up by x
+4xy Tremolo (x=speed, y=depth)
+5xy Tremor (x=ontime, y=offtime)
+E2y FineVolume Down by y
+E3y FineVolume Up by y
+E5y Tremolo Waveform: Sine, Ramp Down, Square, Random
+E5D Set Surround
+E5E Fine Pan Left
+E5F Fine Pan Right
+E8y Set Pan Position to y
+
+Sample Location Effects Details
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+FX  DESCRIPTION
+อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+0xx No Effect
+1xx Set Sample Offset to xx00h
+E9y Retrigger Note in y=frames
+ECy NoteCut in y=frames
+EDy NoteDelay for y=frames
+EEy 0=Forward Play, 1=Backward Play
+EFy Invert Loop y=speed
+
+Global Effects Details
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+FX  DESCRIPTION
+อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+0xx No Effect
+1xx Set Tempo to x (0=song stop)
+2xx Set BPM to x (range 20..FF)
+3xx Position Jump to order x
+400 Set Pattern Loop Beginning
+4xx x!=0, Set Pattern Loop End and start looping
+5xx Pattern Break to row x
+6xx Pattern Delay for x clicks
+7xy Set Internal Flag. x=flag, y=value
+9xx Set Global Music volume
+E0y Set Filter on (y=1)/off (y=0)
+
+     0=8363 4=8608 8=7894 C=8125
+     1=8424 5=8671 9=7951 D=8184
+     2=8485 6=8734 A=8009 E=8244
+     3=8547 7=8797 B=8067 F=8303
+
+
+
+
+
+
+

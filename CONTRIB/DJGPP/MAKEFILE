@@ -1,0 +1,41 @@
+CPP= gcc
+LINK= gxx
+FLAGS=-m486 -fomit-frame-pointer -O2 -Wall
+RM= rm
+OL= ../ol32/ol
+
+all: op.exe palconv.exe
+
+op.exe: op.o xlib.a ../ol32/overload.o gus.o music.o gdm.o s3m.o
+	$(LINK) $(FLAGS) -s op.o ../ol32/overload.o xlib.a gus.o music.o gdm.o s3m.o
+	copy /b \djgpp\bin\pmodstub.exe+a.out op.exe > NUL
+	$(RM) a.out a.exe
+	djp -q op.exe
+	$(OL) op.exe OPLAY.RAW
+	$(OL) op.exe OPLAY.PAL
+	$(OL) op.exe MODERNB.FNT
+	$(OL) op.exe SMALTHIN.FNT
+	$(OL) op.exe OPEXIT.BIN
+
+palconv.exe: palconv.o
+	$(LINK) $(FLAGS) -s palconv.o -o palconv.exe
+palconv.o: palconv.cpp
+	$(CPP) $(FLAGS) -c palconv.cpp
+
+s3m.o: s3m.cpp
+	$(CPP) $(FLAGS) -c s3m.cpp
+
+gdm.o: gdm.cpp gdm.h
+	$(CPP) $(FLAGS) -c gdm.cpp
+
+gus.o: gus.cpp gus.h
+	$(CPP) $(FLAGS) -c gus.cpp
+
+music.o: music.cpp music.h
+	$(CPP) $(FLAGS) -c music.cpp
+
+op.o: op.cpp
+	$(CPP) $(FLAGS) -c op.cpp
+
+clean:
+	$(RM) *.o op.exe palconv.exe

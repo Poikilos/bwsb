@@ -1,0 +1,5 @@
+I used Paul's xlib for djgpp library for this.. you can get the original
+archive (along with source code) on the internet. I'm including a
+precompiled library simply for simplicity.
+
+ftp://x2ftp.oulu.fi/pub/msdos/programming/djgpp2/xlibdj25.zip

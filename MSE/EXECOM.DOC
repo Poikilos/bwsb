@@ -1,0 +1,24 @@
+             EXECOM 1.2  Copyright (c) 1989  Thomas G. Hanlin III
+
+
+ The EXECOM utility is copyrighted, and may not be distributed in modified
+ form or without the original documentation and files.  Subject to those
+ limitations, it may be freely distributed.  No fee may be charged for such
+ duplication, aside from a disk copying fee (if applicable) of not more than
+ $6.00.  EXECOM may also be modified by you, for your own use only.
+
+ The EXECOM utility is a replacement for the EXE2BIN program that used to be
+ distributed with DOS.
+
+ EXECOM is less powerful than EXE2BIN in that it does not support segment
+ fixups.  Most people will never notice this difference.
+
+ EXECOM is different than EXE2BIN in that it produces .COM files instead of
+ .BIN files by default, and in that it deletes the original .EXE file if
+ successful.
+
+ EXECOM is better than EXE2BIN because: it's smaller, it's faster (especially
+ for larger files), it comes with source code, and... it's free.
+
+ Acknowledgements: EXECOM was based, in a large part, on Chris Dunford's
+ EXE2COM utility, which was written in C.

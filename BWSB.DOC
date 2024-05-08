@@ -1,0 +1,1011 @@
+
+                       Bells, Whistles, and Sound Boards
+                             TUTORIAL DOCUMENTATION
+
+                 v1.21GNU for ASM, C/C++, TP, QB, PDS, and PB
+
+                    Copyright (c) 1993-97, Edward Schlunder
+        
+                This package is no longer shareware/freeware/etc.. 
+                   See COPYING.ES for redistribution details.
+
+        This project was started on 07-14-93 and now completed on 06-18-95
+               (two years have been put into the making of BWSB)
+
+I. Contents
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+        1.      Introduction
+        1.1     Packing List
+        1.2     Hardware Requirements
+        1.3     Feature List
+        1.4     Credits
+        1.5     Comments about BWSB/OmniPlayer from users
+        
+        2.      Brief Tutorial
+        2.1     File Types Used
+        2.2     Getting Music Going
+        2.3     Adding Sound Effects
+        2.4     Things to Keep in Mind
+
+        3.      Language Differences
+
+        4.      Miscellaneous
+        4.1     Common Questions and Concerns about BWSB
+        4.2     Known Bugs and Limitations
+        4.3     Need Music? Read Here!
+        4.4     Technical Support/Contact Information
+        4.5     Distribution List
+        4.6     Closing Words
+
+  License Agreement
+  ---------------------------------------------------------------------
+    This program is free software; you can redistribute it and/or modify
+    it under the terms outlined in COPYING.ES. 
+
+Chapter 1. Introduction
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+          BWSB  is a digital sound and music programming library for use
+        in  games,  demos, intros, etc. All  music and sound effects are
+        played  in the background, allowing  your program to do anything
+        it  likes  while  the sound and  music  is  playing. BWSB uses a
+        seamless  interface  to support  different sound devices through
+        the  use of runtime loadable music & sound engines (more on this
+        coming  up), so adding support for many different sound cards in
+        your  programs is no problem at all.
+
+1.1 Packing List
+
+          When you decompress BWSB to your hard drive, make sure you use
+        PKUNZIP   -D  BWSBxxx  [enter],  which  will  let  pkzip  create
+        directories  on your hard drive. This  makes the whole package a
+        little bit less cluttered.
+
+        Documentation:
+        BWSB.DOC       This tutorial document.
+        BWSB.REV       List of all the latest changes and additions
+        BWSB-REF.DOC   Function reference. It might be handy to print it.
+        TTP.TXT        Tailgunner Target Practice documentation.
+        REGISTER.DOC   Tells about what you get when you register.
+        REGISTER.FRM   Registration form to order BWSB.
+        LICENSE.DOC    License agreement for the registered version.
+G->                    See section 1.4 for the license agreement when
+                       using the unregistered evaluation copy of BWSB.
+
+        Example Programs:
+        SETUP.EXE      Program to setup some of the example programs
+                       for your sound card and configuration.     [C]
+        MMP.EXE        Example module player.                [QB/PDS]
+        SND-PAD.EXE    Instrument player for demonstrating
+                       the PlaySample routine.               [QB/PDS]
+        GDMPLAY.EXE    Example module player.                    [TP]
+        GDMSCOPE.EXE   Module player that displays a digital
+                       scope in tune with the music.             [TP]
+        TTP.EXE        Tailgunner Target Practice example
+                       game for BWSB                             [TP]
+        PLAYC.EXE      Example module player.                 [C/C++]
+        CHPLAY.EXE     A little more advanced module player   [C/C++]
+        TPLAY.EXE      Example module player.. Really tiny.     [ASM]
+
+        Utilities:
+        OL.EXE         OverLoader - a program to tack files onto the
+                       end of your EXE files for demos, games, etc so
+                       that you don't have lots of external data files
+        2GDM.EXE       Converts many different module formats to the
+                       GDM format, which is the only format BWSB
+G->                    loads directly. See section 2.1.1.
+
+        Example Music:
+        TTP.GDM        'Tek Gets Off' - 4 channel digital music by
+                       Tek/OTM. This was originally composed in S3M
+                       format.
+        4MORN.GDM      '4 In the Morning' - 8 channel digital music
+                       by Stalker/OTM. This was originally composed
+                       in S3M format with Scream Tracker v3.21.
+
+        Include Files:
+        BWSB.H         Declarations of BWSB routines          [C/C++]
+        GDMTYPE.H      GDM file structure definitions         [C/C++]
+        CHANTYPE.H     Structure definitions for the
+                       GetChannelTable routine.               [C/C++]
+        BWSB.BI        Declarations of BWSB routines         [QB/PDS]
+        GDMTYPE.BI     GDM file structure definitions     [QB/PDS/PB]
+        CHANTYPE.BI    Structure definitions for the
+                       GetChannelTable routine.           [QB/PDS/PB]
+        BWSB.PBI       PowerBasic declarations for BWSB
+                       routines                                  [PB]
+        BWSB.INC       ASM external declarations.               [ASM]
+        GDMTYPE.INC    ASM structure definitions for GDM files  [ASM]
+
+        Libraries/Units/Objects:
+        MSE_ASM.OBJ    Large/medium memory model object file    [ASM]
+        MSE_CL.LIB     Large memory model library             [C/C++]
+        MSE_CM.LIB     Medium memory model library            [C/C++]
+        MSE_TP.PAS     Turbo Pascal unit source code. Make       [TP]
+                       sure you compile this to create the
+                       MSE_TP.TPU unit so that you can use
+                       BWSB's routines.
+        MSE_PB.OBJ     OBJ routines for PowerBasic               [PB]
+        MSE_QB.LIB     Library for QuickBasic 4.5 to make EXEs   [QB]
+        MSE_QB.QLB     QuickLibrary for QuickBasic 4.5 to use
+                       BWSB in the QB environment.               [QB]
+        MSE_PDS.LIB    Library for PDS 7.1 to make EXEs         [PDS]
+        MSE_PDS.QLB    QuickLibrary for PDS 7.1 to use BWSB in
+                       the QBX environment.                     [PDS]
+
+          There are quite a few additional files, but they are fairly
+        self explanatory.
+
+1.2 Hardware Requirements
+
+          BWSB  requires  a  386SX  or better  CPU.  This  is due to the
+        intense  popularity of 386 and 486  machines today. XTs and 286s
+        are  quickly going out of  style, and programming something this
+        complex  for  a 286 would make  development take much longer.
+
+          Naturally,  a  sound  card is  required.  BWSB  currently only
+        supports  the  Sound Blaster family  of  sound cards, the Gravis
+        Ultrasound, and the Pro AudioSpectrum or any 100% compatibles.
+
+          Some  of the included example programs  require a VGA card for
+        display  of oscilloscopes, animations, etc.  However, no part of
+        the sound library requires any type of video card, and therefore
+        your programs do not have to require a VGA or better.
+
+1.3 Feature List
+
+         ©      Seamless  support  for different  sound devices. No code
+              needs  changing to support different sound devices, output
+              on  each device acts (almost) exactly the same as it would
+              on  another,  from your application's  point of view. BWSB
+              takes care of hiding any differences from you.
+
+         ©      Support   for  several  sound   devices.  Sound  devices
+              currently supported are:
+
+                Gravis Ultrasound   (Stereo up to 41KHz)
+                Sound Blaster 1.xx  (Mono up to 21KHz)
+                Sound Blaster 2.xx  (Mono up to 43KHz)
+                Sound Blaster Pro   (Stereo up to 22KHz)
+                Sound Blaster 16    (Stereo up to 45KHz)
+                Pro AudioSpectrum   (Stereo up to 45KHz)
+
+                Any sound card 100% compatible with one
+                or more of the above.
+
+                More  sound devices will be  added later. They will work
+              with your programs with only a simple recompilation.
+
+         ©      BWSB is very stable! Stability with BWSB is very good
+              because it does not use IRQ 0 and does not use other
+              perverse optimizations that other sound systems use. High
+              stability was one of the key items kept in mind while
+              developing BWSB.
+
+         ©      Conversion  of  many  module formats  to  GDM.  With the
+              included  utility  (2GDM) you can  convert your modules to
+              GDM  format,  which are loaded  very quickly because it is
+              almost  identical to how modules are stored in memory with
+              BWSB.
+
+              The following can be converted:
+              MOD/NST/WOW/OCT S3M STM MTM 669 e669 ULT FAR MED (MMD0)
+
+         ©      BWSB is compatible with the following compilers:
+
+              Borland C/C++ v3.x
+              Watcom C/C++ v10.x (using WCL, not compatible with WCL386)
+              Turbo Pascal v6.x/7.x
+              QuickBASIC v4.5
+              Microsoft Basic v7.x
+              PowerBasic v3.x
+
+                It is very possible that BWSB will work with other
+              compilers, but the above were the actual compilers we were
+              able to test it with.
+
+         ©      BWSB  is  compatible  with all  programmers  who have at
+              least  a vague understanding of how to program a computer.
+              <g>
+
+         ©      All  sample data can be kept in EMS (expanded memory) if
+              available. This frees up base memory for your program.
+
+              Note: On the Gravis Ultrasound, all sample data is kept in
+                    DRAM on the card at all times. No base or EMS memory
+                    is used for sample data.
+
+         ©      Ability  to play music and sound effects together at the
+              same time. For instance, you could have some digital music
+              going  on in your game, then  have gun shots and explosion
+              sound  effects playing too, all  at the same time, without
+              stopping anything!
+
+         ©      Support  of up to 32  digital sound channels. This means
+              that  you  can  play up to  32  digital sounds at one time
+              (provided that your computer is fast enough for this).
+
+         ©      IRQ  0 Free. Everything plays  in the background without
+              reprogramming   the   timer   chip   (which   is  slightly
+              incompatible  with  multitaskers, etc).  This lets you use
+              IRQ  0  for more important  things,  such as video retrace
+              timing   for  fast  page   flipping  or  snowless  palette
+              switching on VGAs.
+
+         ©      Because  BWSB  is  IRQ  0  free,  programs  using  these
+              routines  will still run  properly under multitaskers such
+              as  Windows  and  DesqView,  without  any modifications or
+              additional  coding. Many other digital music systems cause
+              Windows  to crash because Windows does not expect programs
+              to reprogram IRQ 0.
+
+         ©      I've gotten reports that BWSB actually speeds up programs
+              compiled with QuickBASIC and PDS. Don't ask me if it's
+              a fact or not, I have no idea. I use C myself.
+
+         ©      BWSB supports full 0 - 15 left to right panning in music
+              and sound  effect playing  on all sound  devices  (this is
+              fully  compatible with   the Gravis  Ultrasound's  panning
+              capability).
+
+         ©      All  major  Protracker effects  are implemented. Effects
+              left  out  are  Set Filter  On/Off  and Glissando, both of
+              which  do  not get used very  often.  In fact, we found no
+              modules using Glissando, so this wasn't implemented.
+
+         ©      Most  major Scream Tracker 3.2x effects are implemented.
+              This includes such effects  as Retrigger+Volume Slide, Set
+              Global Volume, and Fine Vibrato.
+
+         ©    Many more brainless things forgotten here.
+
+1.4 Credits
+
+        Edward Schlunder          - Project head. All major coding
+        zilym@aztec.asu.edu         and some of the documentation.
+
+        Alex Chaflin              - All Turbo Pascal support and much
+        achalfin@uceng.uc.edu       of the documentation.
+
+        Ryan Petrie               - Misc original coding. Wrote some of
+        20546@ef.ev.maricopa.edu    the first mixer prototypes.
+
+        Ariel Gross/Taylor Pakula - Composed the example music files
+        stalker@primenet.com        included here and provided us with
+        tek@malkavian.org           many more to test BWSB with.
+  
+          Major thanks go out to those people who I've called upon to do
+        beta   testing  here  and  there  and  to  all  those  who  have
+        contributed  ideas.  Most of all, a  huge  thank you goes to all
+        those who have registered and made our efforts have some sort of
+        purpose.
+
+          Many  more  people helped out  greatly with the development of
+        BWSB.  There are so many it would  be very hard to list them all
+        here.
+
+1.5 Comments about BWSB/OmniPlayer from users
+    
+        From Alex Slanina <slanina@msn.com>:
+
+        "...the best freaking player yet, completely stable even under
+         Win'95!! I'm very impressed with the speed and efficiency and 
+         can't wait to find another update..."
+
+        [NOTE: I've gotten mixed reports about BWSB working under
+         Win'95 Beta. Some say it works flawlessly while others have
+         it flat out crash the whole OS. I assume this is due to older
+         beta releases still being used]
+
+        From GPFault on IRC #coders <daredevl@enterprise.america.com>:
+        
+        "...the first player that works CORRECTLY on my PAS 16..."
+
+        From Kyle Morrison <kylemorrison@delphi.com>:
+        
+        "...I've been searching for 4+ years for a library like this!"
+         
+        From Mike Olshansky <mike.olshansky@f1230.n2410.21.fidonet.org>:
+        
+        "...Best I've seen, especially at this price! ... An overall 
+         excellent product..."
+
+        From Dag-Erling Sm\xrgrav <dagsm@infolink.no>:
+
+        "...the only music engine I've seen (apart from those in 
+         commercial games) that not only claims to support PAS 16, but 
+         actually does so..."
+
+
+Chapter 2. Brief Tutorial
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+          This  chapter is for those of  you just starting out with BWSB
+        or  any other digital interface kit. It gives you the basic idea
+        of how to make a simple S3M or raw sample play using BWSB.
+
+          If  you've  already  used BWSB  before,  or  have used another
+        similar  interface  kit, you can  probably skip this chapter and
+        just  look at the example source code and the function reference
+        for further information.
+
+2.1 File Types Used
+
+          Digital  music  is  made  up  of  two  distinct parts: samples
+        (instruments)  and pattern data  (music notation). Patterns tell
+        which  samples  to play at what  time and frequency. Samples are
+        small  digital  recordings of real  instruments.  This system of
+        music reproduction can be very realistic yet not require massive
+        amounts  of disk space for a full digital recording of an entire
+        musical piece.
+
+          BWSB  supports  several module formats  through the use of the
+G->     2GDM  utility  (see  section 2.1.1).  More  formats may be added
+        later,  provided  that they are  similar  enough to the internal
+        format so that they will sound half decent.
+
+2.1.1 2GDM Module Conversion Utility
+
+          Included  with BWSB is a simple  utility to convert almost any
+        module  file  format to GDM format  (the internal format used in
+        BWSB). In this version of BWSB, you must convert all modules you
+        wish  to use in your programs to GDMs first.
+
+        2GDM is easy to use, just use:
+        C:\>2GDM filename [new filename]
+
+          'filename' does not need to include a file extension.
+
+2.1.2 Runtime Loadable Music and Sound Engines (MSEs)
+
+          Music  and Sound Engines (MSEs) are the modules actually doing
+        all  the work in BWSB. MSEs consist of all the data, tables, and
+        code  used to mix multichannel digital sound, process music, and
+        output  sound  on various sound  devices. For each sound device,
+        there  is a separate MSE file.  This saves memory by not loading
+        code  and  tables for sound  devices  that aren't actually being
+        used at runtime.
+
+          In  the  current  version  of BWSB,  there  are  six MSE files
+        included:
+
+         GUS     .MSE - Gravis Ultrasound
+         SB1X    .MSE - Sound Blaster 1.xx
+         SB2X    .MSE - Sound Blaster 2.xx
+         SBPRO   .MSE - Sound Blaster Pro
+         SB16    .MSE - Sound Blaster 16
+         PAS     .MSE - Pro AudioSpectrum
+
+          When you tell BWSB which MSE file you want to use, it loads it
+        into  memory  ready to use. MSEs  are always kept in base memory
+        (except,  possibly,  in  future 32  bit  versions). Through this
+        system,  it is very easy to  add support for other sound devices
+        in the future, and it's very easy to program for devices you may
+        not even own.
+
+2.1.3 Libraries, QuickLibraries, and Units
+
+          All  LIBs, QLBs, TPUs, and OBJs are in the \LIB directory. The
+        TPU  files may need to be  created first by compiling MSE_TP.PAS
+        if the TPU version is not already there. These are the files:
+
+        MSE_ASM.OBJ  - Large/medium memory model library for ASM
+        MSE_CL.LIB   - Large Memory Model library for C/C++ compilers
+        MSE_CM.LIB   - Medium Memory Model library for C/C++ compilers
+        MSE_TP.PAS   - May need to compile this to get the file below:
+        MSE_TP.TPU   - Turbo Pascal 6.x/7.x Unit file. Make sure you
+                       tell the TP IDE where to find this in the
+                       options menu.
+        MSE_PDS.LIB  - PDS 7.x library for making EXEs
+        MSE_PDS.QLB  - PDS 7.x quicklibrary for loading into QBX.EXE
+        MSE_QB.LIB   - QuickBasic 4.5 library for making EXEs
+        MSE_QB.QLB   - QuickBasic 4.5 quicklibrary for loading into
+                       QB.EXE
+        MSE_PB.OBJ   - PowerBasic 3.x object file for use with $LINK
+
+          To  use  any of the routines  in  the QuickBasic or QuickBasic
+        Extended  programming environment, you must load the appropriate
+        QLB:
+
+        C:\BWSB\LIB>QB /L MSE_QB           [ For QuickBasic ]
+        C:\BWSB\LIB>QBX /L MSE_PDS            [ For PDS ]
+
+          Please  note  the  PDS 7.1 seems  to  conflict with BWSB's EMS
+        routines  in  the environment. You  can either disable QBX's EMS
+        support  ("/E:0")  or  you can  disable  BWSB's EMS support (see
+G->     section  2.2  about  loading a module).  If  you don't do one of
+        these  two,  running  programs  in  QBX  will  likely  crash the
+        machine. This only applies to the environment; compiled versions
+        of your programs in EXE form do not have this problem.
+
+          If you wish to use the C/C++ libraries with the Borland C/C++
+        3.1 IDE, you must first edit the file TLINK.CFG (in the \BIN
+        directory) to include the line "-3". This allows TLINK to link
+        386 specific opcodes, which are used frequently throughout
+        BWSB's routines.
+
+          If you are using PB/QB/PDS/C/C++, you will probably want to
+        edit your INCLUDE environment variable to include the \INCLUDE
+        directory of BWSB. This directory contains several files that
+        are used in all of the example programs included. If you don't
+        want to modify your INCLUDE environment variable, you will have
+        to modify the example source files so that they specify the
+        path of the BWSB includes.
+
+2.2 Getting Music Going
+
+          The first thing to do is load and initialize your MSE. This is
+        done  in  the  code fragment  that  follows. Note, however, this
+        assumes  you're using a Sound Blaster  1.xx with the SB1X.MSE in
+        the current directory.
+
+          Basic  and  Pascal  use  all  of  the computer's memory, which
+        gives  our routines no room to  store pattern data, sample data,
+        etc.  To  get around this, you  must deallocate some heap memory
+        using  the  SETMEM  function  in Basic  or  the  $M directive in
+        Pascal.
+
+        Note: Loading  the MSE prior to  calling  any other routines  in
+              the BWSB library is paramount for avoiding system crashes.
+              If  *any* other routines in BWSB are called before loading
+              a  MSE, the system will likely  reboot or lockup or aliens
+              will take over your computer.
+
+- C/C++ --------------------------------------------------------------------
+#include <bwsb.h>                  /* Declare all BWSB subs and functions */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <io.h>
+#include <fcntl.h>
+
+void main(void)
+{  GDMHeader ModHeader;            /* Module header */
+   int ErrorFlag;
+   int file, MusChans, j;
+   unsigned int OverRate;
+   int Addr = { 0xFFFF },          /* Autodetect Base I/O address */
+       IRQ = { 0xFF },             /* Autodetect IRQ level */
+       DMA = { 0xFF };             /* Autodetect DMA channel */
+
+ErrorFlag = LoadMSE("SB1X.MSE",    /* ASCIIZ MSE file to load */
+                    0,             /* File Offset to load from */
+                    45,            /* Oversampling rate (sound quality) */
+                    4096,          /* Buffer size */
+                    &Addr,         /* Base I/O (0xFFFF autodetect) */
+                    &IRQ,          /* IRQ level (0xFF autodetect) */
+                    &DMA);         /* DMA channel (0xFF autodetect) */
+- QuickBasic/PDS -----------------------------------------------------------
+'Declare all the BWSB subs and functions:
+'$INCLUDE: 'BWSB.BI'
+'$INCLUDE: 'GDMTYPE.BI'
+
+DIM ModHeader       AS GDMHeader           'Module Header
+
+Freemem& = FRE(-1) - 80000                 'Basic Heap - EXE Memory (80000)
+A& = SETMEM(-Freemem&)                     'This is the memory freed for
+                                           'module and MSE usage.
+
+'                  File Offset Ä¿  ÚÄ Oversampling rate (sound quality)
+'                                 
+ErrorFlag = LoadMSE("SB1X.MSE", 0, 45, 4096, &HFFFF, &HFF, &HFF)
+'                                                       
+'       MSE file name ÄÄÙ                ³      ÃÄÄÄÄÄÄÁÄÄÄÄÙ
+'                           Buffer size ÄÙ      ÀÄ Autodetect IRQ, base I/O
+'                                                  address, and DMA channel
+- Turbo Pascal -------------------------------------------------------------
+{$M 16384,0,65360}   { Leave some memory for the module, don't hog }
+                     { all the heap space }
+Program PlayGDM;
+
+Uses MSE_TP, DOS;         { Include all the MSE functions and Types }
+
+Var
+  ModHeader : GDMHeader;  { Declare a module header }
+  BaseIO : Word;
+  IRQ : Byte;
+  DMA : Byte;
+  ErrorFlag : Word;
+
+Begin
+  BaseIO := $FFFF;        { Variables are used because values are returned }
+  IRQ := $FF;             { Direct values are not supported with reference }
+  DMA := $FF;             { parameters.                                    }
+
+  {                   File Offset Ä¿  ÚÄ Oversampling rate (quality)       }
+  {                                                                      }
+  ErrorFlag := LoadMSE('SB1X.MSE', 0, 45, 4096, BaseIO, IRQ, DMA);         }
+  {                                                                   }
+  {       MSE file name ÄÄÙ                ³      ÃÄÄÄÄÄÄÁÄÄÄÄÙ            }
+  {                           Buffer size ÄÙ      ÀÄ Autodetect IRQ, DMA,  }
+  {                                                  and I/O Address.      }
+End.
+----------------------------------------------------------------------------
+
+          The  next step is to load your module. The module load routine
+        can  load your module into base  memory, EMS memory, or GUS DRAM
+        (only  with the GUS MSE). It'll  only  load  the module into EMS
+        memory if you tell it to. However, you must first detect whether
+        EMS  services actually exist, or you'll probably end up crashing
+        the  system.  Included  with BWSB  is  an  EMS detection routine
+        (EmsExist), just for this purpose.
+
+          The following code assumes you're loading the module "NRG.GDM"
+        from  the current directory. It detects  EMS memory and loads it
+        into EMS if detected.
+
+- C/C++ --------------------------------------------------------------------
+ErrorFlag = EmsExist && 1;            /* Enable EMS if available */
+file = open("TUNE.GDM", O_RDONLY | O_BINARY);
+/*                   ÚÄ Calling: Load Flags (EMS enable) */
+/* Load our module:    Returns: Error flag (0 - no errors) */
+LoadGDM(file, 0, &ErrorFlag, &ModHeader);
+/*                              */
+/* File ÄÙ    ÀÄ Offset into     ÀÄ Module header that you can use later */
+/* Handle        file to load       to get information on the GDM loaded. */
+/*               from. */
+close(file);                          /* Close the file handle.. */
+- QuickBasic/PDS -----------------------------------------------------------
+IF EmsExist THEN Flags = 1 ELSE Flags = 0  'Are there EMS services available?
+
+File = FREEFILE                            'Get a free file handle number
+OPEN "TUNE.GDM" FOR BINARY AS File         'Open the module in binary mode
+'                  ÚÄ Calling: Load Flags (EMS enable)
+'Load our module:    Returns: Error flag (0 - no errors)
+LoadGDM File, 0, Flags, VARSEG(ModHeader), VARPTR(ModHeader)
+'                                
+'   File ÄÙ   ÀÄ Offset into       ÀÄ Module header that you can use later
+' Handle         file to load         to get information on the GDM loaded.
+'                from.
+CLOSE File                                 'Close the file handle..
+- Turbo Pascal -------------------------------------------------------------
+Begin
+  If EmsExist          { Are there EMS services available? }
+    Then Flags := 1    { Yes, then use it                  }
+    Else Flags := 0;   { No, disable EMS use               }
+
+  Assign(File, 'TUNE.GDM');         { Open the module file }
+  Reset(File);
+
+  {                               ÚÄ Calling: Load Flags (EMS enable)     }
+  { Load our module:                Returns: Error flag (0 - no errors)  }
+  ErrorFlag := LoadGDM(File, 0, Flags, ModHeader);
+  {                                                                    }
+  {         File handle ÄÙ   ÀÄ Offset into  ÀÄ Module header that can be }
+  {                             file to load    used later to get info on }
+  {                             from.           the GDM loaded.           }
+
+  Close(File);                     { Close the file handle }
+End.
+----------------------------------------------------------------------------
+
+          Then  you'll want to start up  the music engine and enable the
+        music.  Note  that GDMs do not  include  a byte telling how many
+        channels  are  used; you must  scan  through the channel default
+        panning  table  to  count  how many  channels  are  in  use. Pan
+        position  of  FFh  implies that the  channel  is not used in the
+        module.  Any  other value means that  the channel is used in the
+        music file.
+
+- C/C++ --------------------------------------------------------------------
+MusChans = 0;                         /* Start out at zero.. */
+for (j = 0; j < 32; j++)
+  if (ModHeader.PanMap[j] != 0xFF) MusChans++;
+
+/*  ÚÄ Actual oversampling rate in use (Hz) */
+/*                                         */
+OverRate = StartOutput(MusChans, 0);  /* Start your (sound) engines */
+/* # of Music+Sound                                               */
+/* channels              ÄÙ      ÀÄ Amplification level (0 - none)  */
+
+StartMusic();                         /* Enable the music play flag */
+/* Music should be playing now.. */
+- QuickBasic/PDS -----------------------------------------------------------
+MusChans = 0                               'Start out at zero..
+FOR J = 1 TO 32                            'Scan for used music channels
+  IF ASC(MID$(ModHeader.PanMap, J, 1)) <> &HFF THEN
+    MusChans = MusChans + 1
+  END IF
+NEXT
+
+'   ÚÄ Actual oversampling rate in use (Hz)
+'   
+OverRate& = StartOutput(MusChans, 0)      'Start your (sound) engines
+'                                
+'# of Music+Sound channels ÄÙ     ÀÄ Amplification level (0 - none)
+
+StartMusic                                'Enable the music play flag
+'Music should be playing now.
+- Turbo Pascal -------------------------------------------------------------
+Begin
+  MusChans := 0;         { Start out with zero channels }
+
+  For J := 1 to 32 do    { Scan for used channels in then Pan mapping }
+    If ModHeader.PanMap[J] <> $FF
+      Then MusChans := MusChans + 1;
+
+
+  {   ÚÄ Actual oversampling rate in use (Hz)   }
+  {                                            }
+  OverRate := StartOutput(MusChans, 0);   { Start your (sound) engines }
+  {                                                                  }
+  {  # of Music+Sound channels ÄÙ     ÀÄ Amplification level (0 - none)}
+
+  StartMusic;    { Enable the music play flag }
+  { The music should be playing now }
+End;
+----------------------------------------------------------------------------
+
+          Of course, once you're tired of the music, you'll use this:
+
+- C/C++ --------------------------------------------------------------------
+StopMusic();                          /* Disable music processing */
+StopOutput();                         /* Stop all sound output    */ 
+UnloadModule();                       /* Free module memory       */
+FreeMSE();                            /* Remove MSE from memory   */
+}
+- QuickBasic/PDS -----------------------------------------------------------
+StopMusic                               'Disable music processing
+StopOutput                              'Stop all sound output
+UnloadModule                            'Free module memory
+FreeMSE                                 'Remove MSE from memory
+- Turbo Pascal -------------------------------------------------------------
+Begin
+  StopMusic;                           { Disable music processing }
+  StopOutput;                          { Stop all sound output    }
+  UnLoadModule;                        { Free module memory       }
+  FreeMSE;                             { Remove MSE from memory   }
+End.
+----------------------------------------------------------------------------
+
+2.3 Adding Sound Effects
+
+          Adding  sound effects to your programs is not a hard task. You
+        first  must  create  a GDM with  the  sound  effects you will be
+        using. Say you have a sound effect named LASER.VOC. You are also
+        using  the music file RAINBOW.S3M. The  first thing you would do
+        is  load  up Scream Tracker 3  (or  any other module editor that
+        supports  loading and saving S3Ms,  or for that matter, whatever
+        module format your music is currently in).
+
+          Once  your  in your module editor,  load RAINBOW.S3M as if you
+        were  about  to  edit it. Press  F3  (or whatever in your module
+        editor)  to  get to the sample  editing screen in ST3. Then move
+        down  to  an empty sample slot  and load the LASER.VOC into that
+        slot.  Remember which sample number this slot is for later use..
+        If  you  forget,  you can always  go  back  with the SND-PAD.EXE
+        program  to load the GDM form of your music file and look at the
+        sample numbers along the left hand side of the screen.
+
+          Ok,  now  you've got a S3M  (or  whatever format you're using)
+        with  all the music and sound effects you want. Save this module
+        and  exit the editor. Now you've got to convert it to a GDM with
+        the 2GDM utility (included with BWSB). Now you have RAINBOW.GDM,
+        with  both your music and sound effects stored in the file. Keep
+        a  copy  of RAINBOW.S3M in case you  later want to add or remove
+        sound effects.
+
+          In  your  program, you would set  things up as normal for just
+G->     plain  module playing (see section  2.2). The only difference is
+        that   you  must  allocate  more  sound  channels  when  calling
+        StartOutput. Here is an example of the modification to make:
+
+- C/C++ --------------------------------------------------------------------
+/*  ÚÄ Actual oversampling rate in use (Hz) */
+/*                                         */
+OverRate = StartOutput(MusChans + 4, 0);    /* Start your (sound) engines */
+/*                                                                     */
+/*    # of Music channels ÄÙ      ³  ÀÄ Amplification level (0 - none)    */
+/*    # of sound effect channels ÄÙ                                       */
+- QuickBasic/PDS -----------------------------------------------------------
+'   ÚÄ Actual oversampling rate in use (Hz)
+'   
+OverRate& = StartOutput(MusChans + 4, 0)      'Start your (sound) engines
+'                                   
+'      # of Music channels ÄÙ      ³  ÀÄ Amplification level (0 - none)
+'      # of sound effect channels ÄÙ
+- Turbo Pascal -------------------------------------------------------------
+Begin
+  {   ÚÄ Actual oversampling rate in use (Hz)   }
+  {                                            }
+  OverRate := StartOutput(MusChans + 4, 0);  { Start your (sound) engines }
+  {                                                                    }
+  {      # of Music channels ÄÙ      ³  ÀÄ Amplification level (0 - none) }
+  {      # of sound effect channels ÄÙ                                    }
+End;
+----------------------------------------------------------------------------
+
+          Note  that  the total number of  channels you allocate can not
+        exceed  32. Another thing to keep in mind that the more channels
+        you  allocate,  the more CPU power  being used up (except on the
+        GUS).  So,  try to keep the  number of channels required for use
+        down to a minimum.
+
+          Once  you've  got  everything  initialized  and  the  music is
+        playing  (note: music does not have  to be enabled to play sound
+        effects,  but  in most games you  will be having both playing at
+        the  same time), you need to call the PlaySample routine to play
+        some sound effects.
+
+- C/C++ --------------------------------------------------------------------
+do
+{  key = getch();
+   Sample = key - '0';
+   SndFX++;
+   if (SndFX==5) SndFX = 1;
+
+/*                     ÚÄ Digital sound channel to play on */
+/*                                                        */
+   PlaySample(MusChans + SndFX, Sample, 16000, 64, 0xFF);
+/*                                                                      */
+/*              Sample # to play ÄÙ       ³    ³     ÀÄ Use default panning */
+/*                  Play sample at 16KHz ÄÙ    ÀÄ Maximum volume            */
+} while (key!=27);                    /* Exit loop if Esc pressed           */
+
+- QuickBasic/PDS -----------------------------------------------------------
+DO
+  DO
+    Key$ = INKEY$
+  LOOP UNTIL LEN(Key$)                 'Loop until key pressed
+  Sample = VAL(Key$)                   'Find which sample # to play
+
+  SNDFX = SNDFX + 1                    'Step through sound effect channels
+  IF SNDFX = 5 THEN SNDFX = 1
+'                   ÚÄ Digital sound channel to play on
+'                   
+PlaySample MusChans + SNDFX, Sample, 16000, 64, &HFF
+'                                              
+'            Sample # to play ÄÙ       ³    ³     ÀÄ Use default panning
+'                Play sample at 16KHz ÄÙ    ÀÄ Maximum volume
+LOOP UNTIL Key$ = CHR$(27)             'Exit loop if Esc pressed
+- Turbo Pascal -------------------------------------------------------------
+Uses Crt;  { Required for ReadKey function }
+
+Var
+  Key : Char;
+  SndFX : Integer;
+  Sample : Integer;
+
+Begin
+  Repeat
+    Key := ReadKey;   { Read in a key }
+    If Key <> #27     { Make sure it wasn't ESC }
+      Then Begin
+        Sample := Ord(Key) - Ord('0');   { Get Sample number to Play }
+        SndFX := SndFX + 1;
+        If SndFX >= 5
+          Then SndFX := 5;
+
+{                   ÚÄ Digital sound channel to play on        }
+{                                                             }
+PlaySample(MusChans + SndFX, Sample, 22000, 64, $FF);
+{                                             
+{            Sample # to play ÄÙ       ³    ³    ÀÄ Use default panning }
+{                Play sample at 22KHz ÄÙ    ÀÄ Maximum volume           }
+
+      End;
+  Until Key = #27;  { User has pressed ESC so exit }
+End.
+----------------------------------------------------------------------------
+
+          This  short piece of code would  let the user press the number
+        keys  (0-9) to play samples 0-9 in the loaded GDM file at 16KHz,
+        while  not disturbing the music that  is also playing. It cycles
+        through  4  different sound effect  channels  so that each sound
+        effect will not cut off the sound effect played just before it.
+
+2.4 Things to Keep in Mind
+
+        ©     There  are many more features to BWSB not documented here,
+              this  is  just  a  little bit  of  help  for those getting
+              started. You can learn much more by looking at the example
+              programs  and  reading about the  other  routines in BWSB,
+F->           documented in the function reference guide (BWSB-REF.DOC).
+              You will probably want to print that file out; it does not
+              contain high order ASCII specifically for this purpose.
+
+        ©     You  may  have problems running  a  printer while music or
+              sound is enabled. This happens if the sound card shares an
+              IRQ with the LPT port (such as the dreaded IRQ 7).
+
+        ©     Don't  use any routines before loading a MSE with LoadMSE!
+              Otherwise, watch the system reboot!
+
+        ©     Always wipe your nose before going out public.
+
+        ©     Do  not  enable music processing  without  first loading a
+              music file! Or, watch the system crash!
+
+        ©     Do  not  free a module  from memory before disabling music
+              processing!  Or,  watch the  possible  system crash (won't
+              always happen, but would be very likely with time).
+
+        ©     If you have problems working in your language environment,
+              disable  EMS use or just run your program in compiled form
+              (EXE)  each time. IDEs seems  to dislike EMS routines to a
+              degree.
+
+        ©     FreeMSE must be called  before  your program exits to DOS!
+              If it is not called,  you will lock the machine at the end
+              of your program.
+
+        ©     BWSB does not   support  samples  over  64K long.  This is
+              usually  not  a  problem for  music  files,  but for sound
+              effects (mainly voice samples) you will need to watch your
+              back.  Use  the  ChannelPos function  to  help  play large
+              samples in smaller blocks.
+
+        ©     SAVE YOUR WORK OFTEN AND KEEP RECENT BACKUPS!!
+
+        ©     Yes,  there  are an uncounted number  of ways to crash the
+              system  using  these routines  incorrectly. Don't let that
+              make you think that this library is buggy or hard to use!!
+              BWSB  was  created with speed  (highest priority) and size
+              (second  priority)  in  mind; putting  in  a bunch of safe
+              guards  in  the code would only  bloat the library so that
+              your product would be considerably larger.
+
+        ©     If  you  have problems with your  source code (it locks up
+              the machine all the time), just take a look at the example
+              programs  given. If that doesn't help, you can always look
+              back in the documentation here or send us some email.
+
+Chapter 3. Language Differences
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+   [C/C++]    All of the example C code was written using Borland C/C++
+              v3.1 and may need some slight modifications to compile
+              using other C/C++ compilers.
+
+   [QB/PDS]   FreeMSE  will  automatically be called  on  exit in normal
+              cases,  but it doesn't hurt to call it again.  That  won't
+              lock   up   the   system.
+
+   [TP/C/C++] FreeMSE does not get called automatically on exit.  To get
+              the  same  effect  as  in  the  QB/PDS  version,  put  the
+              following code immediately after loading the MSE:
+
+   [TP]       ExitProc := @FreeMSE; { Do an automatic FreeMSE if abort }
+   [C/C++]    atexit(FreeMSE);     // Do an automatic FreeMSE if aborted
+
+Chapter 4. Miscellaneous
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+4.1 Common Questions and Concerns about BWSB
+
+        Q: I'm writing a game that will have three episodes, the first
+           being free to the public and the other two only available
+           if the user pays me some amount. Will I need a commercial
+           registration for the extra two episodes?
+        A: As long as they are only getting advertisement through
+           noncommercial channels, you do not need a commercial
+           registration. In this scenario, you are getting
+           advertisement for the other two episodes from the first
+           one that it publically distributable, so no, you do not
+           need a commercail license.
+
+        Q: I represent a commercail company that creates games and
+           other programs for the PC. We are in need of some
+           specialized routines for an upcoming project. Would you
+           be able to create this for us (at a fair price)?
+        A: At the time of this writing, I do not have an open
+           schedule for such projects (since my school schedule is
+           extended to graduate High School early), but email me to
+           find out the current status. Fairly soon school will let
+           out and in about a year I will be done with High School
+           completely.
+
+        Q: Hey, sonny, do you know where my car is?
+        A: Sure! Right where you parked it last time!
+
+        Q: I'm having trouble loading GDMs larger than 450k.
+        A: You probably haven't enabled EMS support with BWSB or you do
+           not have EMS memory in your computer. Try loading the module
+           using one of the example players included.
+
+           If they can load it, you haven't enabled EMS support with
+G->        BWSB properly (see section 2.2). If one of the example
+           players can't load the module, you probably don't have EMS
+           services available. Try using EMM386.EXE that came with DOS
+           to get EMS memory (refer to your DOS manual).
+
+        Q: Does BWSB use it's own mixing routines on a GUS?
+        A: No, it uses the GUS onboard mixing services that the GUS
+           provides. This is why there are so many slight differences
+           when using the GUS (like not using much CPU power for 32
+           channels, etc)
+
+        Q: What is DRAM?
+        A: For all you non-GUS users (or GUS users who've never
+           upgraded your GUS to 1mb), the GUS uses onboard memory for
+           all digital samples. DRAM is simply the type of memory
+           used on a GUS.
+
+        Q: I have some other libraries that I'd like to use along
+           side BWSB. How do I get all the libraries merged into one?
+        A: For this you should refer to your books on LIB and LINK
+           for information on putting libraries together. It is a
+           fairly painless process.
+
+           If you'd like a more visual method of changing libraries
+           around, get the Library Wizard program by Thomas Hanlin.
+           It makes it as easy as a mouse click to add and remove OBJs
+           from a library.
+
+        Q: How come there is no support for XM (FastTracker ][ module)
+           and MIDI formats?
+        A: These two formats are quite different from the majority of
+           digital music formats established. Supporting them will take
+           a fair bit of reworking in BWSB, which will require some
+           time. Currently no time schedule is available for when this
+           will be supported.
+
+4.2 Known Bugs and Limitations
+
+        ©     There should be a way to load sound effects separately
+              instead of inside of the modules.
+
+        ©     BWSB-REF.DOC needs more 'Example:' fields filled in, and
+              not just for C/C++.
+
+        ©     There should be a way to load different module formats at
+              runtime instead of using 2GDM first.
+
+        ©     People keep pleading for XM support. In BWSB's current
+              state, these files can't be implemented very well. These
+              files probably won't be implemented for a while until I
+              can rewrite the music engine. Even then, this may only be
+              supported under Watcom C/C++ 32bit implementation (since
+              Watcom support will require a rewrite anyway).
+
+4.3 Need Music? Read Here!
+
+          So  you're  writing  a  game and  you  need  lots of original,
+        creative,  and earth shaking music for your first class game? If
+        you've  ever  tried your hand at  composing  music, you know how
+        time consuming it can be to make professional sounding music.
+
+          Instead of using second quality music for your game, you can
+        purchase music at a reasonable price from our select group of
+        musicians who we feel will create satisfactory musical pieces
+        for your productions. Here is a list of musicians and their
+        email addresses for additional information on purchasing music:
+
+        Stalker/OverThrowMachine  - Wrote one of the example songs
+        aka Ariel Gross             included with BWSB.
+        stalker@primenet.com
+
+        Tek/OverThrowMachine      - Wrote the example song used in
+        aka Taylor Pakula           Tailgunner's Target Practice.
+        tek@malkavian.org
+
+4.4 Technical Support/Contact Information
+
+        I no longer provide technical support for BWSB. I'm much more
+        busy with other stuff now (college, jobs, etc). If you have
+        problems, try asking on programming newsgroups, I'm sure
+        people will help there.
+
+4.5 Distribution List
+
+        To subscribe, send email to bwsb-request@ajusd.ml.org with the
+        word "subscribe" somewhere in the message body. Then you can
+        send mail to the list at bwsb-list@ajusd.ml.org.
+
+4.6 Closing Words
+
+        I haven't modified anything in this package in two years. Some
+        of it might be old, sorry.
+
+        Wow, my first package distributed under the GPL. I sure hope I
+        deleted all those nasty "rights reserved" and "do not distribute"
+        messages in all those source code files. If you find some, please
+        disregaurd them, COPYING.ES overrides all else.
+
+        Maybe I'll make more programs available under GPL sometime in
+        the future. We can always hope.
+
+
+        þ "The louder the music, the better the code"
